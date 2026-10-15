@@ -416,15 +416,23 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
     }
 
     // Jalur B: Jika file dibuka lewat Vercel (mengambil data kas)
-    if (fn === 'getKasDanStatusWarga') {
+   if (fn === 'getKasDanStatusWarga') {
       var thn = args[0] || new Date().getFullYear();
-      fetch(GAS_URL + '?action=getData&tahun=' + encodeURIComponent(thn))
-        .then(function(res) { return res.json(); })
+      var cleanUrl = (GAS_URL || '').trim();
+      fetch(cleanUrl + '?action=getData&tahun=' + encodeURIComponent(thn))
+        .then(function(res) {
+          return res.text().then(function(text) {
+            try {
+              return JSON.parse(text);
+            } catch (e) {
+              throw new Error('Respon server bukan JSON: ' + text.slice(0, 80));
+            }
+          });
+        })
         .then(function(data) { ok(data); })
         .catch(function(err) { fail({ message: 'Gagal memuat data dari server Google: ' + err.message }); });
       return;
     }
-
     // Jalur C: Jika file dibuka lewat Vercel (mengirim data: login, verifikasi, pengeluaran, pengumuman)
     var payload = { aksi: fn };
     if (fn === 'cekLoginAdmin') {
