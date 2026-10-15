@@ -392,48 +392,41 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function rp(n) { return 'Rp ' + Math.round(Number(n) || 0).toLocaleString('id-ID'); }
-  function hasGAS() { return typeof google !== 'undefined' && google.script && google.script.run; }
-  function isMasuk(t) { return String(t.tipe || '').toLowerCase().indexOf('masuk') >= 0; }
-  function wajib() { return S.d.warga.filter(function (w) { return !w.bebasIuran && !w.pindah; }); }
-  function st(w, m) { return (w.statusBulan && w.statusBulan[m]) || { lunas: false, nominal: 0, status: 'Tidak ada data', kosong: true }; }
+  // 1. Tempel URL Web App Google Apps Script Anda (wajib berakhiran /exec)
+  var GAS_URL = 'https://script.google.com/macros/s/AKfycbxTK-7hIlKVySlAvKw4flzOxa4Fq-pnY9yeJjNkd3LFlgrtub3_o8MR3wznC-pV5LDo/exec';
+  var NOMOR_WA_SECURITY = '0859-7372-7773';
 
-  function toast(msg) {
-    var t = $('toast'); t.textContent = msg; t.hidden = false;
-    clearTimeout(toast.h); toast.h = setTimeout(function () { t.hidden = true; }, 3000);
-  }
-  // 1. Tempel URL Web App kamu di dalam tanda kutip ini:
-  var GAS_URL = 'https://script.google.com/macros/s/AKfycbx...ID_LENGKAP.../exec';
-  function hasGAS() { 
-    return typeof google !== 'undefined' && google.script && google.script.run; 
-  }
-
+  // 2. Jembatan API Murni Vercel (Menggunakan fetch tanpa google.script.run)
   function run(fn, args, ok, fail) {
-    // Jalur A: Jika file dibuka langsung di dalam Google Apps Script
-    if (hasGAS()) {
-      var r = google.script.run.withSuccessHandler(ok).withFailureHandler(fail);
-      r[fn].apply(r, args);
+    var cleanUrl = (GAS_URL || '').trim();
+    if (!cleanUrl || cleanUrl.indexOf('http') !== 0) {
+      fail({ message: 'URL API Google Apps Script belum diisi di index.html' });
       return;
     }
 
-    // Jalur B: Jika file dibuka lewat Vercel (mengambil data kas)
-   if (fn === 'getKasDanStatusWarga') {
+    // Jalur GET: Mengambil data kas dan warga
+    if (fn === 'getKasDanStatusWarga') {
       var thn = args[0] || new Date().getFullYear();
-      var cleanUrl = (GAS_URL || '').trim();
-      fetch(cleanUrl + '?action=getData&tahun=' + encodeURIComponent(thn))
-        .then(function(res) {
-          return res.text().then(function(text) {
-            try {
-              return JSON.parse(text);
-            } catch (e) {
-              throw new Error('Respon server bukan JSON: ' + text.slice(0, 80));
-            }
-          });
-        })
-        .then(function(data) { ok(data); })
-        .catch(function(err) { fail({ message: 'Gagal memuat data dari server Google: ' + err.message }); });
+      var targetUrl = cleanUrl + '?action=getData&tahun=' + encodeURIComponent(thn);
+
+      fetch(targetUrl, {
+        method: 'GET',
+        redirect: 'follow'
+      })
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP Status ' + res.status);
+        return res.json();
+      })
+      .then(function(data) {
+        ok(data);
+      })
+      .catch(function(err) {
+        fail({ message: 'Gagal mengambil data dari Google Sheet: ' + err.message });
+      });
       return;
     }
-    // Jalur C: Jika file dibuka lewat Vercel (mengirim data: login, verifikasi, pengeluaran, pengumuman)
+
+    // Jalur POST: Kirim data (Login, Verifikasi, Pengeluaran, Info, Tagihan)
     var payload = { aksi: fn };
     if (fn === 'cekLoginAdmin') {
       payload.pinAdmin = args[0];
@@ -458,21 +451,38 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
       payload.pinAdmin = args[1];
     }
 
-    fetch(GAS_URL, {
+    fetch(cleanUrl, {
       method: 'POST',
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      redirect: 'follow'
     })
-    .then(function(res) { return res.json(); })
     .then(function(res) {
-      if (res.status === 'sukses') {
+      if (!res.ok) throw new Error('HTTP Status ' + res.status);
+      return res.json();
+    })
+    .then(function(res) {
+      if (res && res.status === 'sukses') {
         ok(res.data);
       } else {
-        fail({ message: res.pesan || 'Gagal memproses data di server' });
+        fail({ message: (res && res.pesan) || 'Terjadi kesalahan sistem di server' });
       }
     })
     .catch(function(err) {
-      fail({ message: 'Koneksi ke Google gagal: ' + err.message });
+      fail({ message: 'Gagal memproses aksi ke server: ' + err.message });
     });
+  }
+  function isMasuk(t) { return String(t.tipe || '').toLowerCase().indexOf('masuk') >= 0; }
+  function wajib() { return S.d.warga.filter(function (w) { return !w.bebasIuran && !w.pindah; }); }
+  function st(w, m) { return (w.statusBulan && w.statusBulan[m]) || { lunas: false, nominal: 0, status: 'Tidak ada data', kosong: true }; }
+
+  function toast(msg) {
+    var t = $('toast'); t.textContent = msg; t.hidden = false;
+    clearTimeout(toast.h); toast.h = setTimeout(function () { t.hidden = true; }, 3000);
+  }
+  function run(fn, args, ok, fail) {
+    if (!hasGAS()) { fail({ message: 'Halaman ini harus dibuka lewat Web App Apps Script.' }); return; }
+    var r = google.script.run.withSuccessHandler(ok).withFailureHandler(fail);
+    r[fn].apply(r, args);
   }
 
   // ---------- data ----------
