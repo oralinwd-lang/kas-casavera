@@ -142,15 +142,12 @@ th:first-child, td:first-child { text-align: left; }
 .sb-logo { display: none; }
 .pick { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 6px 0; margin-bottom: 4px; }
 
-/* Komponen Tambahan: Tab QRIS, Kartu Barcode, dan Grid Multi-Bulan */
+/* Tab Bayar QRIS & DANA */
 .tab-bayar { display: flex; gap: 8px; margin-bottom: 4px; }
 .tab-bayar button { flex: 1; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); font-weight: 700; font-size: 12.5px; }
 .tab-bayar button.on { background: var(--accent); color: #fff; border-color: transparent; }
 .qris-card { background: #fff; color: #111; border-radius: 14px; padding: 14px; text-align: center; border: 2px solid #e2e8f0; display: grid; gap: 8px; justify-items: center; }
 .qris-card canvas { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-.paket-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-.paket-grid button { padding: 8px 4px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); font-weight: 700; font-size: 12px; text-align: center; }
-.paket-grid button.on { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
 
 /* Keyframes Animasi Dashboard & Chart */
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
@@ -378,7 +375,7 @@ th:first-child, td:first-child { text-align: left; }
     <div class="in" id="nav"></div>
   </nav>
 
-  <!-- MODAL 1: QRIS INTERAKTIF DENGAN SIMPAN BARCODE & KALKULATOR KODE UNIK -->
+  <!-- MODAL 1: QRIS INTERAKTIF DENGAN SIMPAN BARCODE & TRANSFER DANA -->
   <div class="modal" id="m-dana" hidden data-close>
     <div class="sheet">
       <h3>Pembayaran Iuran Kas Casavera</h3>
@@ -388,20 +385,10 @@ th:first-child, td:first-child { text-align: left; }
         <button id="tabDanaBtn" data-act="gantiMetode" data-m="dana">Transfer DANA</button>
       </div>
 
-      <label>Pilih Unit / Blok Anda
-        <select class="input" id="selWargaBayar"></select>
-      </label>
-      <div class="paket-grid">
-        <button class="on" data-pkt="1">1 Bulan</button>
-        <button data-pkt="3">3 Bulan</button>
-        <button data-pkt="6">6 Bulan</button>
-        <button data-pkt="12">1 Tahun</button>
-      </div>
-
       <div class="card" style="text-align:center;background:var(--accent-soft)">
-        <span class="note" style="color:var(--accent)">Total yang Ditransfer (Termasuk Kode Unik Unit)</span>
-        <b style="font-size:26px;color:var(--accent);display:block;letter-spacing:-.01em" id="labelTotalBayar">Rp 60.000</b>
-        <span class="note" id="labelKodeUnikKet" style="font-size:11.5px">Kode unik mempermudah bendahara mencocokkan mutasi bank Anda.</span>
+        <span class="note" style="color:var(--accent);font-weight:600">Nominal Iuran Bulanan</span>
+        <b style="font-size:26px;color:var(--accent);display:block;letter-spacing:-.01em">Rp 60.000 <span style="font-size:13px;font-weight:600">/ bulan</span></b>
+        <span class="note" style="font-size:11.5px">Transfer sesuai jumlah bulan iuran Anda, lalu konfirmasi via tombol Lapor di bawah.</span>
       </div>
 
       <div id="panelQris" class="qris-card">
@@ -578,8 +565,7 @@ th:first-child, td:first-child { text-align: left; }
   }
   var S = { tab: 'beranda', loading: true, galat: '', isAdmin: false, pin: '', sembunyi: false,
     tahun: NOW.getFullYear(), bulan: NOW.getMonth() + 1, d: kosong(), fWarga: 'semua', fMutasi: 'semua', limW: 10, limM: 10, tagih: null, tagihGalat: '', tagihMuat: false, cd: 0,
-    hov: { dash: -1, saldo: -1 }, cw: { dash: 340, saldo: 340 }, menyimpan: false, verif: null, bulanVerif: 0, arsipId: null, ada: false,
-    paketBln: 1 };
+    hov: { dash: -1, saldo: -1 }, cw: { dash: 340, saldo: 340 }, menyimpan: false, verif: null, bulanVerif: 0, arsipId: null, ada: false };
 
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -591,19 +577,6 @@ th:first-child, td:first-child { text-align: left; }
   function toast(msg) {
     var t = $('toast'); t.textContent = msg; t.hidden = false;
     clearTimeout(toast.h); toast.h = setTimeout(function () { t.hidden = true; }, 3000);
-  }
-
-  function hitungKodeUnikUnit(blok, nama) {
-    var s = String(blok || '');
-    var nums = s.match(/\d+/g);
-    if (nums && nums.length) {
-      var joined = nums.join('');
-      var c = parseInt(joined.slice(-3), 10);
-      return c === 0 ? 1 : c;
-    }
-    var sum = 0, str = String(blok || nama || 'C');
-    for (var i = 0; i < str.length; i++) sum += str.charCodeAt(i);
-    return (sum % 900) + 10;
   }
 
   function run(fn, args, ok, fail) {
@@ -1010,34 +983,16 @@ th:first-child, td:first-child { text-align: left; }
     renderWarga(); renderMutasi(); renderLaporan(); renderInfo();
   }
 
-  // QRIS & Multi-Bulan
+  // QRIS
   function isiOpsiWargaBayar() {
-    var sel = $('selWargaBayar'), selPortal = $('selPortalBlok'), selLapor = $('laporNamaWarga');
-    if (!sel || !S.d.warga.length) return;
+    var selPortal = $('selPortalBlok'), selLapor = $('laporNamaWarga');
+    if (!S.d.warga.length) return;
     var opt = '<option value="">-- Pilih Unit Anda --</option>';
     S.d.warga.forEach(function(w, idx) {
       if (!w.pindah) opt += '<option value="' + idx + '">' + esc(w.nama) + ' (Blok ' + esc(w.blok) + ')</option>';
     });
-    sel.innerHTML = opt;
     if (selPortal) selPortal.innerHTML = opt;
     if (selLapor) selLapor.innerHTML = opt;
-  }
-
-  function hitungNominalMultiBulan() {
-    var sel = $('selWargaBayar');
-    var idx = sel ? sel.value : '';
-    var warga = (idx !== '' && S.d.warga[idx]) ? S.d.warga[idx] : null;
-    var kode = warga ? hitungKodeUnikUnit(warga.blok, warga.nama) : 10;
-    var dasar = S.paketBln * S.d.biayaIuran;
-    var total = dasar + kode;
-
-    $('labelTotalBayar').textContent = rp(total);
-    if (warga) {
-      $('labelKodeUnikKet').innerHTML = 'Termasuk <b>kode unik ' + kode + '</b> untuk Blok <b>' + esc(warga.blok) + '</b> agar pengurus otomatis tahu pengirimnya.';
-    } else {
-      $('labelKodeUnikKet').textContent = 'Pilih unit rumah Anda di atas untuk menyematkan kode unik.';
-    }
-    gambarQRIS(total);
   }
 
   function gambarQRIS(nominal) {
@@ -1055,7 +1010,7 @@ th:first-child, td:first-child { text-align: left; }
     for (var r = 0; r < 24; r++) {
       for (var col = 0; col < 24; col++) {
         var isCorner = (r < 6 && col < 6) || (r < 6 && col > 17) || (r > 17 && col < 6);
-        var seed = (r * 31 + col * 17 + nominal) % 3;
+        var seed = (r * 31 + col * 17 + (nominal || 60000)) % 3;
         if (isCorner || seed === 0) {
           ctx.fillRect(pad + col * size, pad + r * size + 4, size - 1, size - 1);
         }
@@ -1065,13 +1020,13 @@ th:first-child, td:first-child { text-align: left; }
     ctx.fillStyle = '#111827'; ctx.font = 'bold 11px Plus Jakarta Sans, sans-serif';
     ctx.fillText('NMID: ID102026CASAVERA', W / 2, H - 26);
     ctx.fillStyle = '#2a5bd7'; ctx.font = 'bold 12px Plus Jakarta Sans, sans-serif';
-    ctx.fillText(rp(nominal), W / 2, H - 10);
+    ctx.fillText(rp(nominal || 60000), W / 2, H - 10);
   }
 
   function unduhBarcodeQRIS() {
     var c = $('qrisCanvas'); if (!c) return;
     var a = document.createElement('a');
-    a.download = 'QRIS-Kas-Casavera-' + S.paketBln + 'Bulan.png';
+    a.download = 'QRIS-Kas-Casavera.png';
     a.href = c.toDataURL('image/png');
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     toast('Barcode QRIS berhasil disimpan ke HP');
@@ -1103,7 +1058,7 @@ th:first-child, td:first-child { text-align: left; }
         '<div class="dots" style="margin:6px 0">' + dots + '</div>' +
         (w.tunggakanBulan > 0 ? '<div style="color:var(--bad);font-weight:700">Tunggakan: ' + w.tunggakanBulan + ' bulan (' + rp(w.tunggakanRp) + ')</div>' : '<div style="color:var(--ok);font-weight:700">Status: Semua iuran lunas / tidak ada tunggakan</div>') +
         '<div style="display:flex;gap:8px;margin-top:4px">' +
-          '<button class="btn" style="flex:1" data-act="bayarRumahIni" data-w="' + idx + '">Bayar Rumah Ini</button>' +
+          '<button class="btn" style="flex:1" data-act="bayarRumahIni">Bayar Rumah Ini</button>' +
           '<button class="btn ghost" style="flex:1" data-act="laporRumahIni" data-w="' + idx + '">Lapor Transfer</button>' +
         '</div>' +
       '</div>';
@@ -1156,7 +1111,7 @@ th:first-child, td:first-child { text-align: left; }
     else if (a === 'toggleSaldo') { S.sembunyi = !S.sembunyi; renderHero(); }
     else if (a === 'dana') {
       bukaModal('m-dana');
-      hitungNominalMultiBulan();
+      gambarQRIS(S.d.biayaIuran || 60000);
     }
     else if (a === 'gantiMetode') {
       var m = el.getAttribute('data-m');
@@ -1175,11 +1130,9 @@ th:first-child, td:first-child { text-align: left; }
       bukaModal('m-lapor');
     }
     else if (a === 'bayarRumahIni') {
-      var wIdx = el.getAttribute('data-w');
       tutupModal();
       bukaModal('m-dana');
-      if ($('selWargaBayar')) $('selWargaBayar').value = wIdx;
-      hitungNominalMultiBulan();
+      gambarQRIS(S.d.biayaIuran || 60000);
     }
     else if (a === 'laporRumahIni') {
       var wIdx2 = el.getAttribute('data-w');
@@ -1249,6 +1202,7 @@ th:first-child, td:first-child { text-align: left; }
       function (err) { S.menyimpan = false; tutupModal(); toast((err && err.message) || 'Gagal mengarsipkan.'); });
   }
 
+  // ---------- TAGIHAN WHATSAPP ----------
   var JEDA_TAGIH = 20, cdTimer = null;
   function mulaiCooldown() {
     S.cd = JEDA_TAGIH; clearInterval(cdTimer);
@@ -1286,6 +1240,7 @@ th:first-child, td:first-child { text-align: left; }
     return true;
   }
 
+  // ---------- EXCEL & CETAK ----------
   var CRC = (function () { var t = [], c, n, k; for (n = 0; n < 256; n++) { c = n; for (k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
   function crc32(b) { var c = 0xFFFFFFFF, i; for (i = 0; i < b.length; i++) c = CRC[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
   function utf8(s) { return new TextEncoder().encode(s); }
@@ -1413,17 +1368,6 @@ th:first-child, td:first-child { text-align: left; }
     });
     document.addEventListener('pointerdown', function (e) { if (!(e.target.closest && e.target.closest('.acw'))) tutupDD(); });
 
-    // Listener Pemilihan Paket Multi-Bulan
-    document.addEventListener('click', function(e) {
-      var btnPkt = e.target.closest && e.target.closest('button[data-pkt]');
-      if (btnPkt) {
-        S.paketBln = Number(btnPkt.getAttribute('data-pkt'));
-        Array.prototype.forEach.call(btnPkt.parentNode.children, function(b) { b.className = b === btnPkt ? 'on' : ''; });
-        hitungNominalMultiBulan();
-      }
-    });
-
-    $('selWargaBayar').addEventListener('change', hitungNominalMultiBulan);
     $('selPortalBlok').addEventListener('change', tampilkanPortalRumah);
 
     // Form Lapor Bayar Warga
