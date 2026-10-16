@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
 <style>
-/* Layout: satu kolom ponsel, saldo sebagai kartu utama, bilah navigasi di bawah. */
 :root {
   --bg: #f3f5f9; --surface: #ffffff; --fg: #1b2433; --muted: #64748b; --line: #e2e8f0;
   --accent: #2a5bd7; --accent-soft: #e6edfb;
@@ -65,7 +64,6 @@ button { cursor: pointer; }
 .banner { border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; font-size: 13px; display: flex; gap: 10px; align-items: center; justify-content: space-between; }
 .banner.err { background: var(--bad-soft); color: var(--bad); }
 .banner.load { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
-.banner.demo { background: var(--warn-soft); color: var(--warn); }
 .hero { background: linear-gradient(150deg, var(--hero-a), var(--hero-b)); color: #fff; border-radius: 20px; padding: 18px; display: grid; gap: 14px; }
 .hero .lbl { font-size: 12px; opacity: .85; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .hero .big { font-size: 32px; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
@@ -103,7 +101,6 @@ button { cursor: pointer; }
 .dots { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; }
 .dots span { text-align: center; font-size: 9px; border-radius: 5px; padding: 4px 0; background: var(--bad-soft); color: var(--bad); font-weight: 700; }
 .dots span.l { background: var(--ok-soft); color: var(--ok); }
-.dots span.b { background: var(--accent-soft); color: var(--accent); }
 .dots span.s { background: var(--warn-soft); color: var(--warn); }
 .dots span.f { background: transparent; color: var(--muted); outline: 1px dashed var(--line); }
 .seg { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -238,7 +235,7 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
     <div class="hero" id="v-hero"></div>
     <div class="sec"><h2 id="jIuran">Iuran</h2><div class="card" id="v-iuran"></div></div>
 
-    <!-- Seksi Keamanan Pos Security -->
+    <!-- Pos Security Casavera -->
     <div class="sec">
       <h2>Keamanan Lingkungan</h2>
       <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
@@ -302,7 +299,7 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
 
   <nav class="bar-nav" aria-label="Menu utama">
     <div class="logo sb-logo" aria-label="Casavera">
-      <svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="var(--accent)"/><path d="M8 19.5 20 9l12 10.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 18v12h15V18" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 30v-6.5a3 3 0 0 1 6 0V30" fill="#fff"/></svg>
+      <svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="var(--accent)"/><path d="M8 19.5 20 9l12 10.5" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 18v12h15V18" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 30v-6.5a3 3 0 0 1 6 0V30" fill="#fff"/></svg>
       <span class="wm">CASA<i>VERA</i></span>
     </div>
     <div class="in" id="nav"></div>
@@ -399,9 +396,6 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
 (function () {
   'use strict';
 
-  // ====================================================================
-  // KONFIGURASI TAUTAN WEB APP & NOMOR WA (SUDAH BERSIH & BENAR)
-  // ====================================================================
   var GAS_URL = 'https://script.google.com/macros/s/AKfycbxTK-7hIlKVySlAvKw4flzOxa4Fq-pnY9yeJjNkd3LFlgrtub3_o8MR3wznC-pV5LDo/exec';
   var NOMOR_WA_SECURITY = '0859-7372-7773';
 
@@ -438,9 +432,7 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
     clearTimeout(toast.h); toast.h = setTimeout(function () { t.hidden = true; }, 3000);
   }
 
-  // ====================================================================
-  // JEMBATAN API MURNI VERCEL (TUNGGAL, BEBAS CORS & TIMEOUT SAFE)
-  // ====================================================================
+  // Jembatan API Vercel dengan Anti-Cache Parameter
   function run(fn, args, ok, fail) {
     var cleanUrl = (GAS_URL || '').split('?')[0].trim().replace(/\/+$/, '');
     if (!cleanUrl || cleanUrl.indexOf('http') !== 0) {
@@ -450,11 +442,12 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
 
     if (fn === 'getKasDanStatusWarga') {
       var thn = args[0] || new Date().getFullYear();
-      var targetUrl = cleanUrl + '?action=getData&tahun=' + encodeURIComponent(thn);
+      var targetUrl = cleanUrl + '?action=getData&tahun=' + encodeURIComponent(thn) + '&_t=' + new Date().getTime();
 
       fetch(targetUrl, {
         method: 'GET',
-        redirect: 'follow'
+        redirect: 'follow',
+        cache: 'no-store'
       })
       .then(function(res) {
         if (!res.ok) throw new Error('HTTP Status ' + res.status);
@@ -507,7 +500,7 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
     });
   }
 
-  // ---------- DATA ----------
+  // Logika Data & Cache Browser
   function kunciLS() { return 'kas_snap_' + S.tahun; }
   function bacaLS() { try { var t = localStorage.getItem(kunciLS()); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
   function tulisLS(res) { try { localStorage.setItem(kunciLS(), JSON.stringify(res)); } catch (e) {} }
@@ -569,7 +562,7 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
     });
   }
 
-  // ---------- RENDER TAMPILAN ----------
+  // Render Visual
   function renderBanner() {
     var b = $('banner'), h = '';
     if (S.loading) h = '<div class="banner load">Memuat data dari Google Sheet…</div>';
@@ -618,7 +611,7 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
       '<p class="note" style="margin:10px 0 0">Iuran ' + rp(S.d.biayaIuran) + ' per bulan. ' + (berjalan ? 'Bulan berjalan belum dihitung sebagai tunggakan. ' : '') + '</p>';
   }
 
-  // GRAFIK
+  // Grafik
   function niceScale(max) {
     if (max <= 0) return { max: 1e6, step: 5e5 };
     var steps = [1e5, 2e5, 5e5, 1e6, 2e6, 5e6, 1e7, 2e7, 5e7, 1e8], step = 1e8;
@@ -716,6 +709,7 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
       var dots = '';
       for (var m = 1; m <= 12; m++) {
         var s = st(w, m);
+        // Garis putus-putus netral jika warga baru masuk di pertengahan tahun
         var c = s.belumMasuk ? 'f' : s.lunas ? 'l' : s.status === 'Sebagian' ? 's' : (s.kosong || (S.tahun === NOW.getFullYear() && m >= NOW.getMonth() + 1) || S.tahun > NOW.getFullYear()) ? 'f' : '';
         dots += '<span class="' + c + '" title="' + esc(NAMA_BULAN[m] + ': ' + s.status + (s.nominal ? ' ' + rp(s.nominal) : '')) + '">' + NB[m] + '</span>';
       }
@@ -771,7 +765,7 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
     renderWarga(); renderMutasi(); renderLaporan(); renderInfo();
   }
 
-  // ---------- MODAL VERIFIKASI ----------
+  // Modal Verifikasi
   function renderVerif() {
     var w = S.verif; if (!w) return;
     var s = st(w, S.bulanVerif), opsi = '';
@@ -790,7 +784,7 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
   function tutupModal() { Array.prototype.forEach.call(document.querySelectorAll('.modal'), function (m) { m.hidden = true; }); S.menyimpan = false; }
   function pesan(id, teks) { var e = $(id); e.textContent = teks; e.hidden = !teks; }
 
-  // ---------- AKSI ----------
+  // Aksi Interaktif
   function act(a, el) {
     if (a === 'muat') muat(true);
     else if (a === 'toggleSaldo') { S.sembunyi = !S.sembunyi; renderHero(); }
@@ -844,7 +838,7 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
       function (err) { S.menyimpan = false; tutupModal(); toast((err && err.message) || 'Gagal mengarsipkan.'); });
   }
 
-  // ---------- TAGIHAN WHATSAPP ----------
+  // Tagihan WhatsApp
   var JEDA_TAGIH = 20, cdTimer = null;
   function mulaiCooldown() {
     S.cd = JEDA_TAGIH; clearInterval(cdTimer);
@@ -882,7 +876,7 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
     return true;
   }
 
-  // ---------- EXCEL & CETAK ----------
+  // Pembuatan Excel (.xlsx) di Browser
   var CRC = (function () { var t = [], c, n, k; for (n = 0; n < 256; n++) { c = n; for (k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
   function crc32(b) { var c = 0xFFFFFFFF, i; for (i = 0; i < b.length; i++) c = CRC[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
   function utf8(s) { return new TextEncoder().encode(s); }
@@ -970,7 +964,7 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
     setTimeout(function () { window.print(); }, 150);
   }
 
-  // ---------- DROPDOWN AUTOCOMPLETE ----------
+  // Dropdown Pencarian
   var DD = { warga: { inp: 'cariWarga', dd: 'ddWarga' }, mutasi: { inp: 'cariMutasi', dd: 'ddMutasi' } };
   function opsiDD(kind) {
     var q = $(DD[kind].inp).value.toLowerCase().trim(), seen = {}, out = [];
@@ -987,7 +981,7 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
   }
   function tutupDD() { ['warga', 'mutasi'].forEach(function (k) { $(DD[k].dd).hidden = true; $(DD[k].inp).setAttribute('aria-expanded', 'false'); }); }
 
-  // ---------- INISIALISASI ----------
+  // Inisialisasi Aplikasi
   function init() {
     var thn = '', i; S.tahun = Math.min(2026, Math.max(2024, S.tahun));
     for (i = 2024; i <= 2026; i++) thn += '<option value="' + i + '"' + (i === S.tahun ? ' selected' : '') + '>' + i + '</option>';
