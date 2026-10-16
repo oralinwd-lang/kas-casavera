@@ -579,6 +579,7 @@ th:first-child, td:first-child { text-align: left; }
     clearTimeout(toast.h); toast.h = setTimeout(function () { t.hidden = true; }, 3000);
   }
 
+  // Jembatan API Murni Vercel
   function run(fn, args, ok, fail) {
     var cleanUrl = (GAS_URL || '').split('?')[0].trim().replace(/\/+$/, '');
     if (!cleanUrl || cleanUrl.indexOf('http') !== 0) {
@@ -927,8 +928,7 @@ th:first-child, td:first-child { text-align: left; }
         var c = s.belumMasuk ? 'f' : s.pending ? 's' : s.lunas ? 'l' : s.status === 'Sebagian' ? 's' : (s.kosong || (S.tahun === NOW.getFullYear() && m >= NOW.getMonth() + 1) || S.tahun > NOW.getFullYear()) ? 'f' : '';
         dots += '<span class="' + c + '" title="' + esc(NAMA_BULAN[m] + ': ' + s.status + (s.nominal ? ' ' + rp(s.nominal) : '')) + '">' + (s.belumMasuk ? '&ndash;' : NB[m]) + '</span>';
       }
-      return '<div class="item' + (S.isAdmin ? ' tap' : '') + '" data-w="' + idx + '"><div class="h"><div style="min-width:0"><div class="n">' + esc(w.nama) + '</div><div class="s">Blok ' + esc(w.blok) + ' · ' + esc(w.statusHunian) +
-        (w.tunggakanBulan > 0 ? ' · <b style="color:var(--bad)">menunggak ' + w.tunggakanBulan + ' bulan (' + rp(w.tunggakanRp) + ')</b>' : '') + '</div></div>' + pillStatus(st(w, S.bulan)) + '</div><div class="dots">' + dots + '</div></div>';
+      return '<div class="item' + (S.isAdmin ? ' tap' : '') + '" data-w="' + idx + '"><div class="h"><div style="min-width:0"><div class="n">' + esc(w.nama) + '</div><div class="s">Blok ' + esc(w.blok) + ' · ' + esc(w.statusHunian) + '</div></div>' + pillStatus(st(w, S.bulan)) + '</div><div class="dots">' + dots + '</div></div>';
     }).join('');
   }
   function renderMutasi() {
@@ -983,13 +983,19 @@ th:first-child, td:first-child { text-align: left; }
     renderWarga(); renderMutasi(); renderLaporan(); renderInfo();
   }
 
-  // QRIS
+  // QRIS & Form Pilihan Warga (Mencegah Blok Double)
   function isiOpsiWargaBayar() {
     var selPortal = $('selPortalBlok'), selLapor = $('laporNamaWarga');
     if (!S.d.warga.length) return;
     var opt = '<option value="">-- Pilih Unit Anda --</option>';
     S.d.warga.forEach(function(w, idx) {
-      if (!w.pindah) opt += '<option value="' + idx + '">' + esc(w.nama) + ' (Blok ' + esc(w.blok) + ')</option>';
+      if (w.pindah) return;
+      var label = esc(w.nama);
+      // Jika nama belum memiliki kurung blok, baru tambahkan
+      if (label.indexOf('(') < 0 && w.blok && w.blok !== '-') {
+        label += ' (Blok ' + esc(w.blok) + ')';
+      }
+      opt += '<option value="' + idx + '">' + label + '</option>';
     });
     if (selPortal) selPortal.innerHTML = opt;
     if (selLapor) selLapor.innerHTML = opt;
@@ -1058,7 +1064,7 @@ th:first-child, td:first-child { text-align: left; }
         '<div class="dots" style="margin:6px 0">' + dots + '</div>' +
         (w.tunggakanBulan > 0 ? '<div style="color:var(--bad);font-weight:700">Tunggakan: ' + w.tunggakanBulan + ' bulan (' + rp(w.tunggakanRp) + ')</div>' : '<div style="color:var(--ok);font-weight:700">Status: Semua iuran lunas / tidak ada tunggakan</div>') +
         '<div style="display:flex;gap:8px;margin-top:4px">' +
-          '<button class="btn" style="flex:1" data-act="bayarRumahIni">Bayar Rumah Ini</button>' +
+          '<button class="btn" style="flex:1" data-act="bayarRumahIni">Bayar Iuran</button>' +
           '<button class="btn ghost" style="flex:1" data-act="laporRumahIni" data-w="' + idx + '">Lapor Transfer</button>' +
         '</div>' +
       '</div>';
@@ -1074,8 +1080,12 @@ th:first-child, td:first-child { text-align: left; }
         return;
       }
       box.innerHTML = pending.map(function(item) {
+        var labelNama = esc(item.nama);
+        if (labelNama.indexOf('(') < 0 && item.blok && item.blok !== '-') {
+          labelNama += ' (Blok ' + esc(item.blok) + ')';
+        }
         return '<div class="item">' +
-          '<div class="h"><div><b>' + esc(item.nama) + ' (Blok ' + esc(item.blok) + ')</b><div class="note">Iuran ' + esc(item.namaBulan) + ' ' + item.tahun + ' · ' + esc(item.tanggal) + '</div></div><span class="pill warn">Menunggu</span></div>' +
+          '<div class="h"><div><b>' + labelNama + '</b><div class="note">Iuran ' + esc(item.namaBulan) + ' ' + item.tahun + ' · ' + esc(item.tanggal) + '</div></div><span class="pill warn">Menunggu</span></div>' +
           '<div>Nominal: <b>' + rp(item.nominal) + '</b></div>' +
           (item.catatan ? '<div class="note">Catatan: ' + esc(item.catatan) + '</div>' : '') +
           '<div style="display:flex;gap:8px;margin-top:4px">' +
@@ -1328,6 +1338,7 @@ th:first-child, td:first-child { text-align: left; }
     setTimeout(function () { window.print(); }, 150);
   }
 
+  // ---------- DROPDOWN AUTOCOMPLETE ----------
   var DD = { warga: { inp: 'cariWarga', dd: 'ddWarga' }, mutasi: { inp: 'cariMutasi', dd: 'ddMutasi' } };
   function opsiDD(kind) {
     var q = $(DD[kind].inp).value.toLowerCase().trim(), seen = {}, out = [];
@@ -1344,6 +1355,7 @@ th:first-child, td:first-child { text-align: left; }
   }
   function tutupDD() { ['warga', 'mutasi'].forEach(function (k) { $(DD[k].dd).hidden = true; $(DD[k].inp).setAttribute('aria-expanded', 'false'); }); }
 
+  // ---------- INISIALISASI ----------
   function init() {
     var thn = '', i; S.tahun = Math.min(2026, Math.max(2024, S.tahun));
     for (i = 2024; i <= 2026; i++) thn += '<option value="' + i + '"' + (i === S.tahun ? ' selected' : '') + '>' + i + '</option>';
