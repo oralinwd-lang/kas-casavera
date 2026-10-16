@@ -601,7 +601,7 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
       '<div style="font-size:11px;opacity:.8">' + (d.audit ? 'Dibaca dari Google Sheet ' + esc(d.audit.waktuBaca) : '') + '</div>';
   }
   function renderIuran() {
-    var w = wajib(), b = S.bulan;
+    var w = wajib().filter(function (x) { return !st(x, S.bulan).belumMasuk; }), b = S.bulan;
     var adaData = w.some(function (x) { return !st(x, b).kosong; });
     var lunas = w.filter(function (x) { return st(x, b).lunas; }).length;
     var pct = w.length ? Math.round(lunas / w.length * 100) : 0;
@@ -696,7 +696,7 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
       var s = st(w, b);
       if (S.fWarga === 'pindah') return !!w.pindah;
       if (w.pindah) return false;
-      if (S.fWarga === 'belum') return !s.lunas;
+      if (S.fWarga === 'belum') return !s.lunas && !s.belumMasuk;
       if (S.fWarga === 'lunas') return s.lunas;
       if (S.fWarga === 'nunggak') return w.tunggakanBulan > 0;
       return true;
@@ -717,7 +717,7 @@ button, select, .chip, nav.bar-nav button { touch-action: manipulation; }
       for (var m = 1; m <= 12; m++) {
         var s = st(w, m);
         var c = s.belumMasuk ? 'f' : s.lunas ? 'l' : s.status === 'Sebagian' ? 's' : (s.kosong || (S.tahun === NOW.getFullYear() && m >= NOW.getMonth() + 1) || S.tahun > NOW.getFullYear()) ? 'f' : '';
-        dots += '<span class="' + c + '" title="' + esc(NAMA_BULAN[m] + ': ' + s.status + (s.nominal ? ' ' + rp(s.nominal) : '')) + '">' + NB[m] + '</span>';
+        dots += '<span class="' + c + '" title="' + esc(NAMA_BULAN[m] + ': ' + s.status + (s.nominal ? ' ' + rp(s.nominal) : '')) + '">' + (s.belumMasuk ? '&ndash;' : NB[m]) + '</span>';
       }
       return '<div class="item' + (S.isAdmin ? ' tap' : '') + '" data-w="' + idx + '"><div class="h"><div style="min-width:0"><div class="n">' + esc(w.nama) + '</div><div class="s">Blok ' + esc(w.blok) + ' · ' + esc(w.statusHunian) +
         (w.tunggakanBulan > 0 ? ' · <b style="color:var(--bad)">menunggak ' + w.tunggakanBulan + ' bulan (' + rp(w.tunggakanRp) + ')</b>' : '') + '</div></div>' + pillStatus(st(w, S.bulan)) + '</div><div class="dots">' + dots + '</div></div>';
