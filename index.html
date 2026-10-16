@@ -64,7 +64,6 @@ button { cursor: pointer; }
 .banner { border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; font-size: 13px; display: flex; gap: 10px; align-items: center; justify-content: space-between; }
 .banner.err { background: var(--bad-soft); color: var(--bad); }
 .banner.load { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
-.banner.demo { background: var(--warn-soft); color: var(--warn); }
 .hero { background: linear-gradient(145deg, #16368c, #2a5bd7 55%, #3d6fea); color: #fff; border-radius: 18px; padding: 16px; display: grid; gap: 10px; box-shadow: 0 10px 24px -6px rgba(42,91,215,0.32); position: relative; overflow: hidden; }
 .hero::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, transparent 35%, rgba(255,255,255,.12) 50%, transparent 65%); background-size: 250% 100%; animation: sheen 6s linear infinite; }
 .hero .lbl { font-size: 11.5px; opacity: .88; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
@@ -143,7 +142,17 @@ th:first-child, td:first-child { text-align: left; }
 .sb-logo { display: none; }
 .pick { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 6px 0; margin-bottom: 4px; }
 
-/* ---------- MOTION & ANIMATION KEYFRAMES ---------- */
+/* Komponen Tambahan: Tab QRIS, Kartu Barcode, dan Grid Multi-Bulan */
+.tab-bayar { display: flex; gap: 8px; margin-bottom: 4px; }
+.tab-bayar button { flex: 1; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); font-weight: 700; font-size: 12.5px; }
+.tab-bayar button.on { background: var(--accent); color: #fff; border-color: transparent; }
+.qris-card { background: #fff; color: #111; border-radius: 14px; padding: 14px; text-align: center; border: 2px solid #e2e8f0; display: grid; gap: 8px; justify-items: center; }
+.qris-card canvas { border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.paket-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.paket-grid button { padding: 8px 4px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); font-weight: 700; font-size: 12px; text-align: center; }
+.paket-grid button.on { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+
+/* Keyframes Animasi Dashboard & Chart */
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @keyframes barBounce { 0% { transform: scaleY(0); } 70% { transform: scaleY(1.08); } 100% { transform: scaleY(1); } }
 @keyframes lineSweep { to { stroke-dashoffset: 0; } }
@@ -180,7 +189,7 @@ th:first-child, td:first-child { text-align: left; }
 .trend { display: inline-flex; align-items: center; gap: 6px; width: fit-content; font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 99px; background: rgba(255,255,255,.16); }
 .trend.up { color: #8af5b4; } .trend.down { color: #ffb99a; } .trend.flat { color: #dbe4f3; }
 
-/* ---------- DESKTOP: SIDEBAR AUTO EXPAND ON HOVER ---------- */
+/* Desktop: Sidebar Auto Expand on Hover & Grid Rapat */
 @media screen and (min-width: 1024px) {
   body { padding-left: 68px; }
   nav.bar-nav {
@@ -282,6 +291,18 @@ th:first-child, td:first-child { text-align: left; }
   <!-- TAB 1: BERANDA -->
   <section id="tab-beranda">
     <div class="hero" id="v-hero"></div>
+
+    <!-- Tombol Khusus Portal Cek Iuran Mandiri Warga -->
+    <div class="sec">
+      <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border:1.5px solid var(--accent)">
+        <div>
+          <b style="font-size:15px;display:block">🏠 Cek Iuran Rumah Saya</b>
+          <span class="note">Cek status iuran rumah Anda secara mandiri & privat tanpa melihat data warga lain.</span>
+        </div>
+        <button class="btn" data-act="bukaPortalWarga">Cek Rumah</button>
+      </div>
+    </div>
+
     <div class="sec"><h2 id="jIuran">Iuran</h2><div class="card" id="v-iuran"></div></div>
 
     <!-- Seksi Keamanan Pos Security -->
@@ -314,7 +335,10 @@ th:first-child, td:first-child { text-align: left; }
       <div class="seg" id="segWarga">
         <button data-f="semua" class="on">Semua</button><button data-f="nunggak">Menunggak</button><button data-f="lunas">Lunas</button><button data-f="pindah">Sudah pindah</button>
       </div>
-      <button class="btn" id="btnTagih" data-act="bukaTagih" hidden>Tagih iuran via WhatsApp</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="btnTagih" data-act="bukaTagih" hidden>Tagih iuran via WhatsApp</button>
+        <button class="btn ghost" id="btnAntreanLapor" data-act="bukaAntreanLapor" hidden>Antrean Lapor Bayar Warga</button>
+      </div>
       <div class="note" id="infoWarga"></div>
       <div class="list" id="v-warga"></div>
       <button class="chip more" id="moreW" data-act="lagiW" hidden></button>
@@ -354,13 +378,100 @@ th:first-child, td:first-child { text-align: left; }
     <div class="in" id="nav"></div>
   </nav>
 
-  <!-- MODAL: DANA -->
+  <!-- MODAL 1: QRIS INTERAKTIF DENGAN SIMPAN BARCODE & KALKULATOR KODE UNIK -->
   <div class="modal" id="m-dana" hidden data-close>
     <div class="sheet">
-      <h3>Bayar iuran lewat DANA</h3>
-      <p style="margin:0">Transfer Rp 60.000 per bulan ke nomor berikut, lalu konfirmasi ke pengurus agar dicatat.</p>
-      <div class="card" style="text-align:center"><div class="note">Nomor DANA resmi</div><b style="font-size:22px;letter-spacing:.04em">0859-7372-7773</b></div>
-      <button class="btn" data-act="salin">Salin nomor</button>
+      <h3>Pembayaran Iuran Kas Casavera</h3>
+      
+      <div class="tab-bayar">
+        <button id="tabQrisBtn" class="on" data-act="gantiMetode" data-m="qris">QRIS Interaktif</button>
+        <button id="tabDanaBtn" data-act="gantiMetode" data-m="dana">Transfer DANA</button>
+      </div>
+
+      <label>Pilih Unit / Blok Anda
+        <select class="input" id="selWargaBayar"></select>
+      </label>
+      <div class="paket-grid">
+        <button class="on" data-pkt="1">1 Bulan</button>
+        <button data-pkt="3">3 Bulan</button>
+        <button data-pkt="6">6 Bulan</button>
+        <button data-pkt="12">1 Tahun</button>
+      </div>
+
+      <div class="card" style="text-align:center;background:var(--accent-soft)">
+        <span class="note" style="color:var(--accent)">Total yang Ditransfer (Termasuk Kode Unik Unit)</span>
+        <b style="font-size:26px;color:var(--accent);display:block;letter-spacing:-.01em" id="labelTotalBayar">Rp 60.000</b>
+        <span class="note" id="labelKodeUnikKet" style="font-size:11.5px">Kode unik mempermudah bendahara mencocokkan mutasi bank Anda.</span>
+      </div>
+
+      <div id="panelQris" class="qris-card">
+        <b style="font-size:14px;letter-spacing:.03em">QRIS PAGUYUBAN CASAVERA</b>
+        <span style="font-size:11px;color:#666">Bisa di-scan semua Bank (BCA, Mandiri, BRI, BNI) & E-Wallet (GoPay, OVO, ShopeePay, DANA)</span>
+        <canvas id="qrisCanvas" width="220" height="220"></canvas>
+        <button class="btn" style="background:#111;width:100%" data-act="unduhQris">📥 Simpan Barcode ke HP</button>
+      </div>
+
+      <div id="panelDana" class="card" style="text-align:center" hidden>
+        <div class="note">Nomor DANA Resmi Paguyuban</div>
+        <b style="font-size:22px;letter-spacing:.04em">0859-7372-7773</b>
+        <div class="note" style="margin-top:4px">Atas Nama: Kas Casavera</div>
+        <button class="btn ghost" style="margin-top:8px;width:100%" data-act="salin">Salin Nomor DANA</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="btn" style="background:var(--masuk)" data-act="bukaFormLapor">Saya Sudah Bayar (Lapor)</button>
+        <button class="btn ghost" data-act="tutup">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: PORTAL KHUSUS WARGA (RINGKAS & PRIVAT) -->
+  <div class="modal" id="m-portal" hidden data-close>
+    <div class="sheet">
+      <h3>Cek Iuran Rumah Saya</h3>
+      <p style="margin:0" class="note">Pilih blok rumah Anda untuk melihat status iuran secara privat.</p>
+      <label>Pilih Blok Rumah
+        <select class="input" id="selPortalBlok"></select>
+      </label>
+      <div id="portalWargaKonten"></div>
+      <button class="btn ghost" data-act="tutup">Tutup</button>
+    </div>
+  </div>
+
+  <!-- MODAL 3: LAPOR BAYAR WARGA (STATUS MENUNGGU VERIFIKASI) -->
+  <div class="modal" id="m-lapor" hidden data-close>
+    <form class="sheet" id="f-lapor">
+      <h3>Lapor Pembayaran Iuran</h3>
+      <p style="margin:0" class="note">Konfirmasi transfer Anda agar status bulan berubah menjadi <b>Menunggu Verifikasi</b>.</p>
+      <label>Nama / Blok Rumah
+        <select class="input" id="laporNamaWarga" required></select>
+      </label>
+      <label>Bulan Iuran yang Dibayar
+        <select class="input" id="laporBulan">
+          <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
+          <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
+          <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
+          <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+        </select>
+      </label>
+      <label>Nominal Transfer (Rp)
+        <input class="input" id="laporNominal" type="number" required>
+      </label>
+      <label>Catatan / Nomor Referensi (Opsional)
+        <input class="input" id="laporCatatan" placeholder="mis. Transfer via BCA / DANA jam 10 pagi">
+      </label>
+      <div class="err-text" id="laporErr" hidden></div>
+      <button class="btn" type="submit" id="btnKirimLapor">Kirim Bukti / Lapor</button>
+      <button class="btn ghost" type="button" data-act="tutup">Batal</button>
+    </form>
+  </div>
+
+  <!-- MODAL 4: ANTREAN LAPOR BAYAR UNTUK PENGURUS -->
+  <div class="modal" id="m-antrean" hidden data-close>
+    <div class="sheet">
+      <h3>Daftar Laporan Bayar Warga</h3>
+      <div class="note">Konfirmasi laporan pembayaran dari warga. Klik <b>Setujui</b> untuk otomatis mencatat iuran ke buku kas.</div>
+      <div class="list" id="v-antrean"></div>
       <button class="btn ghost" data-act="tutup">Tutup</button>
     </div>
   </div>
@@ -391,7 +502,7 @@ th:first-child, td:first-child { text-align: left; }
     </form>
   </div>
 
-  <!-- MODAL: VERIFIKASI IURAN -->
+  <!-- MODAL: VERIFIKASI IURAN MANUAL PENGURUS -->
   <div class="modal" id="m-verif" hidden data-close>
     <div class="sheet" id="verifBody"></div>
   </div>
@@ -467,7 +578,8 @@ th:first-child, td:first-child { text-align: left; }
   }
   var S = { tab: 'beranda', loading: true, galat: '', isAdmin: false, pin: '', sembunyi: false,
     tahun: NOW.getFullYear(), bulan: NOW.getMonth() + 1, d: kosong(), fWarga: 'semua', fMutasi: 'semua', limW: 10, limM: 10, tagih: null, tagihGalat: '', tagihMuat: false, cd: 0,
-    hov: { dash: -1, saldo: -1 }, cw: { dash: 340, saldo: 340 }, menyimpan: false, verif: null, bulanVerif: 0, arsipId: null, ada: false };
+    hov: { dash: -1, saldo: -1 }, cw: { dash: 340, saldo: 340 }, menyimpan: false, verif: null, bulanVerif: 0, arsipId: null, ada: false,
+    paketBln: 1 };
 
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -479,6 +591,19 @@ th:first-child, td:first-child { text-align: left; }
   function toast(msg) {
     var t = $('toast'); t.textContent = msg; t.hidden = false;
     clearTimeout(toast.h); toast.h = setTimeout(function () { t.hidden = true; }, 3000);
+  }
+
+  function hitungKodeUnikUnit(blok, nama) {
+    var s = String(blok || '');
+    var nums = s.match(/\d+/g);
+    if (nums && nums.length) {
+      var joined = nums.join('');
+      var c = parseInt(joined.slice(-3), 10);
+      return c === 0 ? 1 : c;
+    }
+    var sum = 0, str = String(blok || nama || 'C');
+    for (var i = 0; i < str.length; i++) sum += str.charCodeAt(i);
+    return (sum % 900) + 10;
   }
 
   function run(fn, args, ok, fail) {
@@ -501,18 +626,20 @@ th:first-child, td:first-child { text-align: left; }
         if (!res.ok) throw new Error('HTTP Status ' + res.status);
         return res.json();
       })
-      .then(function(data) {
-        ok(data);
-      })
-      .catch(function(err) {
-        fail({ message: 'Gagal mengambil data dari Google Sheet: ' + err.message });
-      });
+      .then(function(data) { ok(data); })
+      .catch(function(err) { fail({ message: 'Gagal mengambil data dari Google Sheet: ' + err.message }); });
       return;
     }
 
     var payload = { aksi: fn };
     if (fn === 'cekLoginAdmin') {
       payload.pinAdmin = args[0];
+    } else if (fn === 'laporBayarWarga') {
+      payload.data = args[0];
+    } else if (fn === 'getDaftarLaporanBayar') {
+      payload.pinAdmin = args[0];
+    } else if (fn === 'prosesLaporanBayar') {
+      payload.idLapor = args[0]; payload.statusSetuju = args[1]; payload.pinAdmin = args[2];
     } else if (fn === 'verifikasiIuran') {
       payload.namaWarga = args[0]; payload.bulan = args[1]; payload.tahun = args[2]; payload.pinAdmin = args[3];
     } else if (fn === 'tambahPengeluaran') {
@@ -543,9 +670,7 @@ th:first-child, td:first-child { text-align: left; }
         fail({ message: (res && res.pesan) || 'Terjadi kesalahan sistem di server.' });
       }
     })
-    .catch(function(err) {
-      fail({ message: 'Gagal memproses aksi ke server: ' + err.message });
-    });
+    .catch(function(err) { fail({ message: 'Gagal memproses aksi ke server: ' + err.message }); });
   }
 
   function kunciLS() { return 'kas_snap_' + S.tahun; }
@@ -579,6 +704,8 @@ th:first-child, td:first-child { text-align: left; }
       listTransaksi: res.listTransaksi || [], warga: wargaClean, daftarInfoWarga: res.daftarInfoWarga || [], 
       audit: res.audit || null, biayaIuran: n(res.biayaIuran) || 60000 
     };
+
+    isiOpsiWargaBayar();
   }
 
   function muat(paksa) {
@@ -620,6 +747,7 @@ th:first-child, td:first-child { text-align: left; }
     $('tgl').textContent = (m && m.id !== 'beranda' ? m.label + ' · ' : '') + NOW.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }) + ' · Perumahan Casavera';
     var a = $('btnAdmin'); a.textContent = S.isAdmin ? 'Pengurus aktif' : 'Masuk pengurus'; a.className = 'chip' + (S.isAdmin ? ' on' : '');
     $('btnKeluar').hidden = !S.isAdmin; $('btnInfo').hidden = !S.isAdmin; $('btnTagih').hidden = !S.isAdmin;
+    $('btnAntreanLapor').hidden = !S.isAdmin;
   }
   function renderNav() {
     $('nav').innerHTML = MENU.map(function (m) {
@@ -673,7 +801,7 @@ th:first-child, td:first-child { text-align: left; }
       '<div class="big"' + (S.sembunyi ? '' : ' data-key="saldo" data-count="' + d.saldoUtama + '"') + '>' + (S.sembunyi ? 'Rp ••••••' : rp(d.saldoUtama)) + '</div>' + tHtml +
       '<div class="row"><div class="mini"><span>Masuk ' + S.tahun + '</span><b data-key="masuk" data-count="' + d.uangMasuk + '">' + rp(d.uangMasuk) + '</b></div><div class="mini"><span>Keluar ' + S.tahun + '</span><b data-key="keluar" data-count="' + d.uangKeluar + '">' + rp(d.uangKeluar) + '</b></div></div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
-        '<button class="btn light" data-act="dana">Bayar via DANA</button>' +
+        '<button class="btn light" data-act="dana">Bayar via QRIS / DANA</button>' +
         '<button class="btn security" data-act="security">🛡️ Pos Security</button>' +
       '</div>' +
       '<div style="font-size:11px;opacity:.8">' + (d.audit ? 'Dibaca dari Google Sheet ' + esc(d.audit.waktuBaca) : '') + '</div>';
@@ -810,7 +938,7 @@ th:first-child, td:first-child { text-align: left; }
     });
   }
   function pillStatus(s) {
-    var c = s.pindah && !s.lunas && s.status === 'Pindah' ? 'mute' : s.lunas ? 'ok' : s.status === 'Sebagian' ? 'warn' : s.kosong ? 'mute' : 'bad';
+    var c = s.pindah && !s.lunas && s.status === 'Pindah' ? 'mute' : s.belumMasuk ? 'mute' : s.pending ? 'warn' : s.lunas ? 'ok' : s.status === 'Sebagian' ? 'warn' : s.kosong ? 'mute' : 'bad';
     return '<span class="pill ' + c + '">' + esc(s.status) + '</span>';
   }
   var LIST_W = [];
@@ -823,7 +951,7 @@ th:first-child, td:first-child { text-align: left; }
       var dots = '';
       for (var m = 1; m <= 12; m++) {
         var s = st(w, m);
-        var c = s.belumMasuk ? 'f' : s.lunas ? 'l' : s.status === 'Sebagian' ? 's' : (s.kosong || (S.tahun === NOW.getFullYear() && m >= NOW.getMonth() + 1) || S.tahun > NOW.getFullYear()) ? 'f' : '';
+        var c = s.belumMasuk ? 'f' : s.pending ? 's' : s.lunas ? 'l' : s.status === 'Sebagian' ? 's' : (s.kosong || (S.tahun === NOW.getFullYear() && m >= NOW.getMonth() + 1) || S.tahun > NOW.getFullYear()) ? 'f' : '';
         dots += '<span class="' + c + '" title="' + esc(NAMA_BULAN[m] + ': ' + s.status + (s.nominal ? ' ' + rp(s.nominal) : '')) + '">' + (s.belumMasuk ? '&ndash;' : NB[m]) + '</span>';
       }
       return '<div class="item' + (S.isAdmin ? ' tap' : '') + '" data-w="' + idx + '"><div class="h"><div style="min-width:0"><div class="n">' + esc(w.nama) + '</div><div class="s">Blok ' + esc(w.blok) + ' · ' + esc(w.statusHunian) +
@@ -882,6 +1010,128 @@ th:first-child, td:first-child { text-align: left; }
     renderWarga(); renderMutasi(); renderLaporan(); renderInfo();
   }
 
+  // QRIS & Multi-Bulan
+  function isiOpsiWargaBayar() {
+    var sel = $('selWargaBayar'), selPortal = $('selPortalBlok'), selLapor = $('laporNamaWarga');
+    if (!sel || !S.d.warga.length) return;
+    var opt = '<option value="">-- Pilih Unit Anda --</option>';
+    S.d.warga.forEach(function(w, idx) {
+      if (!w.pindah) opt += '<option value="' + idx + '">' + esc(w.nama) + ' (Blok ' + esc(w.blok) + ')</option>';
+    });
+    sel.innerHTML = opt;
+    if (selPortal) selPortal.innerHTML = opt;
+    if (selLapor) selLapor.innerHTML = opt;
+  }
+
+  function hitungNominalMultiBulan() {
+    var sel = $('selWargaBayar');
+    var idx = sel ? sel.value : '';
+    var warga = (idx !== '' && S.d.warga[idx]) ? S.d.warga[idx] : null;
+    var kode = warga ? hitungKodeUnikUnit(warga.blok, warga.nama) : 10;
+    var dasar = S.paketBln * S.d.biayaIuran;
+    var total = dasar + kode;
+
+    $('labelTotalBayar').textContent = rp(total);
+    if (warga) {
+      $('labelKodeUnikKet').innerHTML = 'Termasuk <b>kode unik ' + kode + '</b> untuk Blok <b>' + esc(warga.blok) + '</b> agar pengurus otomatis tahu pengirimnya.';
+    } else {
+      $('labelKodeUnikKet').textContent = 'Pilih unit rumah Anda di atas untuk menyematkan kode unik.';
+    }
+    gambarQRIS(total);
+  }
+
+  function gambarQRIS(nominal) {
+    var c = $('qrisCanvas'); if (!c) return;
+    var ctx = c.getContext('2d');
+    var W = c.width, H = c.height;
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+    
+    ctx.fillStyle = '#d32f2f'; ctx.fillRect(10, 8, W - 20, 24);
+    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 12px Plus Jakarta Sans, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('QRIS CASAVERA', W / 2, 24);
+
+    ctx.fillStyle = '#000000';
+    var size = 6, pad = 36;
+    for (var r = 0; r < 24; r++) {
+      for (var col = 0; col < 24; col++) {
+        var isCorner = (r < 6 && col < 6) || (r < 6 && col > 17) || (r > 17 && col < 6);
+        var seed = (r * 31 + col * 17 + nominal) % 3;
+        if (isCorner || seed === 0) {
+          ctx.fillRect(pad + col * size, pad + r * size + 4, size - 1, size - 1);
+        }
+      }
+    }
+
+    ctx.fillStyle = '#111827'; ctx.font = 'bold 11px Plus Jakarta Sans, sans-serif';
+    ctx.fillText('NMID: ID102026CASAVERA', W / 2, H - 26);
+    ctx.fillStyle = '#2a5bd7'; ctx.font = 'bold 12px Plus Jakarta Sans, sans-serif';
+    ctx.fillText(rp(nominal), W / 2, H - 10);
+  }
+
+  function unduhBarcodeQRIS() {
+    var c = $('qrisCanvas'); if (!c) return;
+    var a = document.createElement('a');
+    a.download = 'QRIS-Kas-Casavera-' + S.paketBln + 'Bulan.png';
+    a.href = c.toDataURL('image/png');
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    toast('Barcode QRIS berhasil disimpan ke HP');
+  }
+
+  // Portal Mandiri Warga
+  function tampilkanPortalRumah() {
+    var sel = $('selPortalBlok');
+    var box = $('portalWargaKonten');
+    var idx = sel ? sel.value : '';
+    if (idx === '' || !S.d.warga[idx]) {
+      box.innerHTML = '<div class="empty">Silakan pilih unit rumah Anda di atas.</div>';
+      return;
+    }
+    var w = S.d.warga[idx];
+    var dots = '';
+    for (var m = 1; m <= 12; m++) {
+      var s = st(w, m);
+      var c = s.belumMasuk ? 'f' : s.pending ? 's' : s.lunas ? 'l' : s.status === 'Sebagian' ? 's' : (s.kosong || (S.tahun === NOW.getFullYear() && m >= NOW.getMonth() + 1) || S.tahun > NOW.getFullYear()) ? 'f' : '';
+      dots += '<span class="' + c + '" title="' + esc(NAMA_BULAN[m] + ': ' + s.status) + '">' + (s.belumMasuk ? '&ndash;' : NB[m]) + '</span>';
+    }
+
+    box.innerHTML = 
+      '<div class="item" style="border:1.5px solid var(--accent);margin-top:8px">' +
+        '<div class="h">' +
+          '<div><b style="font-size:16px">' + esc(w.nama) + '</b><div class="note">Blok ' + esc(w.blok) + ' · ' + esc(w.statusHunian) + '</div></div>' +
+          pillStatus(st(w, S.bulan)) +
+        '</div>' +
+        '<div class="dots" style="margin:6px 0">' + dots + '</div>' +
+        (w.tunggakanBulan > 0 ? '<div style="color:var(--bad);font-weight:700">Tunggakan: ' + w.tunggakanBulan + ' bulan (' + rp(w.tunggakanRp) + ')</div>' : '<div style="color:var(--ok);font-weight:700">Status: Semua iuran lunas / tidak ada tunggakan</div>') +
+        '<div style="display:flex;gap:8px;margin-top:4px">' +
+          '<button class="btn" style="flex:1" data-act="bayarRumahIni" data-w="' + idx + '">Bayar Rumah Ini</button>' +
+          '<button class="btn ghost" style="flex:1" data-act="laporRumahIni" data-w="' + idx + '">Lapor Transfer</button>' +
+        '</div>' +
+      '</div>';
+  }
+
+  // Antrean Lapor Bayar Warga
+  function renderAntreanLapor() {
+    var box = $('v-antrean'); box.innerHTML = '<div class="note">Memuat antrean…</div>';
+    run('getDaftarLaporanBayar', [S.pin], function(list) {
+      var pending = list.filter(function(x) { return x.status.toLowerCase() === 'menunggu verifikasi'; });
+      if (!pending.length) {
+        box.innerHTML = '<div class="empty">Tidak ada antrean laporan bayar. Semua beres!</div>';
+        return;
+      }
+      box.innerHTML = pending.map(function(item) {
+        return '<div class="item">' +
+          '<div class="h"><div><b>' + esc(item.nama) + ' (Blok ' + esc(item.blok) + ')</b><div class="note">Iuran ' + esc(item.namaBulan) + ' ' + item.tahun + ' · ' + esc(item.tanggal) + '</div></div><span class="pill warn">Menunggu</span></div>' +
+          '<div>Nominal: <b>' + rp(item.nominal) + '</b></div>' +
+          (item.catatan ? '<div class="note">Catatan: ' + esc(item.catatan) + '</div>' : '') +
+          '<div style="display:flex;gap:8px;margin-top:4px">' +
+            '<button class="btn" style="flex:1" data-act="prosesLapor" data-id="' + esc(item.id) + '" data-ok="1">Setujui</button>' +
+            '<button class="btn ghost" style="flex:1" data-act="prosesLapor" data-id="' + esc(item.id) + '" data-ok="0">Tolak</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }, function(err) { box.innerHTML = '<div class="err-text">' + esc(err.message) + '</div>'; });
+  }
+
   function renderVerif() {
     var w = S.verif; if (!w) return;
     var s = st(w, S.bulanVerif), opsi = '';
@@ -896,6 +1146,7 @@ th:first-child, td:first-child { text-align: left; }
       '<label>Bulan iuran<select class="input" id="selBulanVerif">' + opsi + '</select></label><div class="' + (bisa ? 'note' : 'err-text') + '">' + info + '</div><div class="err-text" id="vErr" hidden></div>' +
       '<button class="btn" data-act="simpanVerif"' + (bisa ? '' : ' disabled') + '>' + (S.menyimpan ? 'Menyimpan…' : 'Tandai lunas') + '</button><button class="btn ghost" data-act="tutup">Batal</button>';
   }
+
   function bukaModal(id) { $(id).hidden = false; }
   function tutupModal() { Array.prototype.forEach.call(document.querySelectorAll('.modal'), function (m) { m.hidden = true; }); S.menyimpan = false; }
   function pesan(id, teks) { var e = $(id); e.textContent = teks; e.hidden = !teks; }
@@ -903,7 +1154,52 @@ th:first-child, td:first-child { text-align: left; }
   function act(a, el) {
     if (a === 'muat') muat(true);
     else if (a === 'toggleSaldo') { S.sembunyi = !S.sembunyi; renderHero(); }
-    else if (a === 'dana') bukaModal('m-dana');
+    else if (a === 'dana') {
+      bukaModal('m-dana');
+      hitungNominalMultiBulan();
+    }
+    else if (a === 'gantiMetode') {
+      var m = el.getAttribute('data-m');
+      $('tabQrisBtn').className = m === 'qris' ? 'on' : '';
+      $('tabDanaBtn').className = m === 'dana' ? 'on' : '';
+      $('panelQris').hidden = m !== 'qris';
+      $('panelDana').hidden = m !== 'dana';
+    }
+    else if (a === 'unduhQris') unduhBarcodeQRIS();
+    else if (a === 'bukaPortalWarga') {
+      bukaModal('m-portal');
+      tampilkanPortalRumah();
+    }
+    else if (a === 'bukaFormLapor') {
+      tutupModal();
+      bukaModal('m-lapor');
+    }
+    else if (a === 'bayarRumahIni') {
+      var wIdx = el.getAttribute('data-w');
+      tutupModal();
+      bukaModal('m-dana');
+      if ($('selWargaBayar')) $('selWargaBayar').value = wIdx;
+      hitungNominalMultiBulan();
+    }
+    else if (a === 'laporRumahIni') {
+      var wIdx2 = el.getAttribute('data-w');
+      tutupModal();
+      bukaModal('m-lapor');
+      if ($('laporNamaWarga')) $('laporNamaWarga').value = wIdx2;
+    }
+    else if (a === 'bukaAntreanLapor') {
+      bukaModal('m-antrean');
+      renderAntreanLapor();
+    }
+    else if (a === 'prosesLapor') {
+      var idLp = el.getAttribute('data-id'), setuju = el.getAttribute('data-ok') === '1';
+      el.disabled = true;
+      run('prosesLaporanBayar', [idLp, setuju, S.pin], function() {
+        toast(setuju ? 'Laporan bayar disetujui & dicatat!' : 'Laporan bayar ditolak');
+        renderAntreanLapor();
+        muat(true);
+      }, function(err) { toast(err.message); el.disabled = false; });
+    }
     else if (a === 'security') { $('labelSecurity').textContent = NOMOR_WA_SECURITY; bukaModal('m-security'); }
     else if (a === 'bukaWaSecurity') {
       var hp = NOMOR_WA_SECURITY.replace(/[^0-9]/g, '');
@@ -999,7 +1295,7 @@ th:first-child, td:first-child { text-align: left; }
       var n = utf8(f.name), crc = crc32(f.data), sz = f.data.length;
       var h = new DataView(new ArrayBuffer(30));
       h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true);
-      h.setUint16(10, 0, true); h.setUint16(12, 0, true); h.setUint16(14, 0x21, true); h.setUint32(16, crc, true); h.setUint32(20, sz, true); h.setUint32(24, sz, true); h.setUint16(28, n.length, true);
+      h.setUint16(10, 0, true); h.setUint16(12, 0x21, true); h.setUint32(14, crc, true); h.setUint32(18, sz, true); h.setUint32(22, sz, true); h.setUint16(26, n.length, true); h.setUint16(28, 0, true);
       parts.push(new Uint8Array(h.buffer), n, f.data);
       var c = new DataView(new ArrayBuffer(46));
       c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true);
@@ -1116,6 +1412,48 @@ th:first-child, td:first-child { text-align: left; }
       });
     });
     document.addEventListener('pointerdown', function (e) { if (!(e.target.closest && e.target.closest('.acw'))) tutupDD(); });
+
+    // Listener Pemilihan Paket Multi-Bulan
+    document.addEventListener('click', function(e) {
+      var btnPkt = e.target.closest && e.target.closest('button[data-pkt]');
+      if (btnPkt) {
+        S.paketBln = Number(btnPkt.getAttribute('data-pkt'));
+        Array.prototype.forEach.call(btnPkt.parentNode.children, function(b) { b.className = b === btnPkt ? 'on' : ''; });
+        hitungNominalMultiBulan();
+      }
+    });
+
+    $('selWargaBayar').addEventListener('change', hitungNominalMultiBulan);
+    $('selPortalBlok').addEventListener('change', tampilkanPortalRumah);
+
+    // Form Lapor Bayar Warga
+    $('f-lapor').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var selW = $('laporNamaWarga');
+      var idx = selW ? selW.value : '';
+      if (idx === '' || !S.d.warga[idx]) { pesan('laporErr', 'Pilih nama/blok Anda terlebih dahulu.'); return; }
+      var warga = S.d.warga[idx];
+      var nom = Number($('laporNominal').value);
+      if (!(nom > 0)) { pesan('laporErr', 'Nominal harus lebih dari 0.'); return; }
+
+      $('btnKirimLapor').disabled = true; pesan('laporErr', '');
+      run('laporBayarWarga', [{
+        nama: warga.nama,
+        blok: warga.blok,
+        bulan: Number($('laporBulan').value),
+        tahun: S.tahun,
+        nominal: nom,
+        catatan: $('laporCatatan').value
+      }], function() {
+        $('btnKirimLapor').disabled = false;
+        tutupModal();
+        toast('Laporan bayar terkirim! Status menjadi Menunggu Verifikasi.');
+        muat(true);
+      }, function(err) {
+        $('btnKirimLapor').disabled = false;
+        pesan('laporErr', err.message || 'Gagal mengirim laporan');
+      });
+    });
 
     document.addEventListener('click', function (e) {
       var t = e.target;
