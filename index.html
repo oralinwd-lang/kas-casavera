@@ -414,14 +414,16 @@ th:first-child, td:first-child { text-align: left; }
       <label>Nama / Blok Rumah
         <select class="input" id="laporNamaWarga" required></select>
       </label>
-      <label>Bulan Iuran yang Dibayar
-        <select class="input" id="laporBulan">
-          <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
-          <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
-          <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
-          <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
-        </select>
-      </label>
+      <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:8px">
+        <label>Tahun Iuran
+          <select class="input" id="laporTahun" required></select>
+        </label>
+        <label>Bulan yang Dibayar
+          <select class="input" id="laporBulan" required>
+            <option value="">-- Pilih Unit Terlebih Dahulu --</option>
+          </select>
+        </label>
+      </div>
       <label>Nominal Transfer (Rp)
         <input class="input" id="laporNominal" type="number" required>
       </label>
@@ -627,15 +629,12 @@ th:first-child, td:first-child { text-align: left; }
     .catch(function(err) { fail({ message: 'Gagal memproses aksi ke server: ' + err.message }); });
   }
 
-  function kunciLS() { return 'kas_snap_' + S.tahun; }
-  function bacaLS() { try { var t = localStorage.getItem(kunciLS()); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
-  function tulisLS(res) { try { localStorage.setItem(kunciLS(), JSON.stringify(res)); } catch (e) {} }
+  function kunciLS(thn) { return 'kas_snap_' + (thn || S.tahun); }
+  function bacaLS(thn) { try { var t = localStorage.getItem(kunciLS(thn)); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
+  function tulisLS(res, thn) { try { localStorage.setItem(kunciLS(thn), JSON.stringify(res)); } catch (e) {} }
 
-  function terapkan(res) {
-    var n = function (v) { return Number(v) || 0; };
-    var arr = function (a) { return Array.isArray(a) && a.length === 12 ? a.map(n) : new Array(12).fill(0); };
-    
-    var wargaClean = (res.warga || []).map(function(w) {
+  function prosesWargaClean(wargaRaw) {
+    return (wargaRaw || []).map(function(w) {
       var isBebas = w.bebasIuran || /bebas/i.test(w.statusHunian) || /iqbal/i.test(w.nama);
       var sb = Object.assign({}, w.statusBulan);
       if (isBebas) {
@@ -650,6 +649,13 @@ th:first-child, td:first-child { text-align: left; }
         statusBulan: sb
       });
     });
+  }
+
+  function terapkan(res) {
+    var n = function (v) { return Number(v) || 0; };
+    var arr = function (a) { return Array.isArray(a) && a.length === 12 ? a.map(n) : new Array(12).fill(0); };
+    
+    var wargaClean = prosesWargaClean(res.warga);
 
     S.d = { 
       saldoUtama: n(res.saldoUtama), saldoAwal: n(res.saldoAwal), saldoAkhirLaporan: n(res.saldoAkhirLaporan), 
@@ -664,7 +670,7 @@ th:first-child, td:first-child { text-align: left; }
 
   function muat(paksa) {
     S.galat = '';
-    var lama = (!paksa) ? bacaLS() : null;
+    var lama = (!paksa) ? bacaLS(S.tahun) : null;
     if (lama) { 
       try { 
         terapkan(lama); 
@@ -677,7 +683,7 @@ th:first-child, td:first-child { text-align: left; }
     run('getKasDanStatusWarga', [S.tahun], function (res) {
       S.loading = false;
       if (res) {
-        tulisLS(res);
+        tulisLS(res, S.tahun);
         terapkan(res);
       } else {
         S.galat = 'Server tidak mengirim data.';
@@ -981,6 +987,89 @@ th:first-child, td:first-child { text-align: left; }
     if (selLapor) selLapor.innerHTML = opt;
   }
 
+  // Pengisian Dropdown Tahun pada Form Lapor Bayar
+  function isiOpsiTahunLapor() {
+    var selT = $('laporTahun');
+    if (!selT) return;
+    var html = '';
+    for (var th = 2024; th <= 2026; th++) {
+      html += '<option value="' + th + '"' + (th === S.tahun ? ' selected' : '') + '>' + th + '</option>';
+    }
+    selT.innerHTML = html;
+  }
+
+  // Filter bulan yang belum lunas pada form Lapor Bayar Warga sesuai Tahun & Nama/Unit
+  function updateOpsiBulanLapor() {
+    var selW = $('laporNamaWarga');
+    var selT = $('laporTahun');
+    var selB = $('laporBulan');
+    if (!selW || !selB) return;
+    
+    var idx = selW.value;
+    if (idx === '' || !S.d.warga[idx]) {
+      selB.innerHTML = '<option value="">-- Pilih Unit Terlebih Dahulu --</option>';
+      return;
+    }
+
+    var tahunDipilih = Number(selT ? selT.value : S.tahun) || S.tahun;
+    var namaTarget = S.d.warga[idx].nama;
+
+    // Jika tahun yang dipilih sama dengan tahun aktif di aplikasi
+    if (tahunDipilih === S.tahun) {
+      prosesRenderBulanTunggakan(S.d.warga[idx]);
+    } else {
+      // Ambil data dari cache lokal atau server untuk tahun yang berbeda
+      var cached = bacaLS(tahunDipilih);
+      if (cached && cached.warga) {
+        var wList = prosesWargaClean(cached.warga);
+        var targetW = wList.find(function(x) { return x.nama === namaTarget; });
+        prosesRenderBulanTunggakan(targetW);
+      } else {
+        selB.innerHTML = '<option value="">Memeriksa data tahun ' + tahunDipilih + '…</option>';
+        selB.disabled = true;
+        run('getKasDanStatusWarga', [tahunDipilih], function(res) {
+          selB.disabled = false;
+          if (res && res.warga) {
+            tulisLS(res, tahunDipilih);
+            var wListBaru = prosesWargaClean(res.warga);
+            var targetWBaru = wListBaru.find(function(x) { return x.nama === namaTarget; });
+            prosesRenderBulanTunggakan(targetWBaru);
+          } else {
+            selB.innerHTML = '<option value="">Gagal memeriksa tahun ' + tahunDipilih + '</option>';
+          }
+        }, function() {
+          selB.disabled = false;
+          selB.innerHTML = '<option value="">Gagal memeriksa tahun ' + tahunDipilih + '</option>';
+        });
+      }
+    }
+  }
+
+  function prosesRenderBulanTunggakan(w) {
+    var selB = $('laporBulan');
+    if (!selB) return;
+    if (!w) {
+      selB.innerHTML = '<option value="">Data unit tidak ditemukan di tahun ini</option>';
+      return;
+    }
+
+    var html = '';
+    var adaTunggakan = false;
+    for (var m = 1; m <= 12; m++) {
+      var s = st(w, m);
+      if (s.lunas || s.belumMasuk) continue;
+      adaTunggakan = true;
+      var labelTambahan = s.status && s.status !== 'Tidak ada data' && s.status !== 'Belum Lunas' ? ' (' + s.status + ')' : '';
+      html += '<option value="' + m + '">' + NAMA_BULAN[m] + labelTambahan + '</option>';
+    }
+
+    if (!adaTunggakan) {
+      selB.innerHTML = '<option value="">Semua bulan sudah lunas 🎉</option>';
+    } else {
+      selB.innerHTML = html;
+    }
+  }
+
   // Portal Mandiri Warga
   function tampilkanPortalRumah() {
     var sel = $('selPortalBlok');
@@ -1070,6 +1159,8 @@ th:first-child, td:first-child { text-align: left; }
     else if (a === 'bukaFormLapor') {
       tutupModal();
       bukaModal('m-lapor');
+      isiOpsiTahunLapor();
+      updateOpsiBulanLapor();
     }
     else if (a === 'bayarRumahIni') {
       tutupModal();
@@ -1079,7 +1170,11 @@ th:first-child, td:first-child { text-align: left; }
       var wIdx2 = el.getAttribute('data-w');
       tutupModal();
       bukaModal('m-lapor');
-      if ($('laporNamaWarga')) $('laporNamaWarga').value = wIdx2;
+      isiOpsiTahunLapor();
+      if ($('laporNamaWarga')) {
+        $('laporNamaWarga').value = wIdx2;
+        updateOpsiBulanLapor();
+      }
     }
     else if (a === 'bukaAntreanLapor') {
       bukaModal('m-antrean');
@@ -1190,7 +1285,7 @@ th:first-child, td:first-child { text-align: left; }
     files.forEach(function (f) {
       var n = utf8(f.name), crc = crc32(f.data), sz = f.data.length;
       var h = new DataView(new ArrayBuffer(30));
-      h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true);
+      h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint8(8, 0);
       h.setUint16(10, 0, true); h.setUint16(12, 0x21, true); h.setUint32(14, crc, true); h.setUint32(18, sz, true); h.setUint32(22, sz, true); h.setUint16(26, n.length, true); h.setUint16(28, 0, true);
       parts.push(new Uint8Array(h.buffer), n, f.data);
       var c = new DataView(new ArrayBuffer(46));
@@ -1312,6 +1407,8 @@ th:first-child, td:first-child { text-align: left; }
     document.addEventListener('pointerdown', function (e) { if (!(e.target.closest && e.target.closest('.acw'))) tutupDD(); });
 
     $('selPortalBlok').addEventListener('change', tampilkanPortalRumah);
+    $('laporNamaWarga').addEventListener('change', updateOpsiBulanLapor);
+    $('laporTahun').addEventListener('change', updateOpsiBulanLapor);
 
     // Form Lapor Bayar Warga
     $('f-lapor').addEventListener('submit', function(e) {
@@ -1323,12 +1420,20 @@ th:first-child, td:first-child { text-align: left; }
       var nom = Number($('laporNominal').value);
       if (!(nom > 0)) { pesan('laporErr', 'Nominal harus lebih dari 0.'); return; }
 
+      var blnDipilih = Number($('laporBulan').value);
+      if (!(blnDipilih >= 1 && blnDipilih <= 12)) {
+        pesan('laporErr', 'Pilih bulan iuran yang valid.');
+        return;
+      }
+
+      var thnDipilih = Number($('laporTahun').value) || S.tahun;
+
       $('btnKirimLapor').disabled = true; pesan('laporErr', '');
       run('laporBayarWarga', [{
         nama: warga.nama,
         blok: warga.blok,
-        bulan: Number($('laporBulan').value),
-        tahun: S.tahun,
+        bulan: blnDipilih,
+        tahun: thnDipilih,
         nominal: nom,
         catatan: $('laporCatatan').value
       }], function() {
