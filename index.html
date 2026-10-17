@@ -762,13 +762,19 @@ nav.bar-nav button:active { transform: scale(.96); }
   function bacaLS(thn) { try { var t = localStorage.getItem(kunciLS(thn)); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
   function tulisLS(res, thn) { try { localStorage.setItem(kunciLS(thn), JSON.stringify(res)); } catch (e) {} }
 
-  function prosesWargaClean(wargaRaw) {
+  function prosesWargaClean(wargaRaw, thn) {
+    thn = thn || S.tahun;
     return (wargaRaw || []).map(function(w) {
       var isBebas = w.bebasIuran || /bebas/i.test(w.statusHunian) || /iqbal/i.test(w.nama);
       var sb = Object.assign({}, w.statusBulan);
       if (isBebas) {
+        // Bebas iuran: Lunas otomatis pada tanggal 20 tiap bulan (bulan lampau sudah Lunas); bulan depan tidak ikut Lunas.
         for (var m = 1; m <= 12; m++) {
-          if (sb[m]) { sb[m].status = 'Lunas'; sb[m].lunas = true; sb[m].bebas = false; }
+          var depan = thn > NOW.getFullYear() || (thn === NOW.getFullYear() && m > NOW.getMonth() + 1);
+          var belumTgl20 = thn === NOW.getFullYear() && m === NOW.getMonth() + 1 && NOW.getDate() < 20;
+          if (depan) sb[m] = { lunas: false, nominal: 0, status: 'Tidak ada data', kosong: true };
+          else if (belumTgl20) sb[m] = { lunas: false, nominal: 0, status: 'Belum jatuh tempo', kosong: true };
+          else if (sb[m] && sb[m].status !== 'Tidak ada data' && !sb[m].belumMasuk) { sb[m] = Object.assign({}, sb[m], { status: 'Lunas', lunas: true, kosong: false, bebas: false }); }
         }
       }
       return Object.assign({}, w, {
@@ -1151,7 +1157,7 @@ nav.bar-nav button:active { transform: scale(.96); }
       // Ambil data dari cache lokal atau server untuk tahun yang berbeda
       var cached = bacaLS(tahunDipilih);
       if (cached && cached.warga) {
-        var wList = prosesWargaClean(cached.warga);
+        var wList = prosesWargaClean(cached.warga, tahunDipilih);
         var targetW = wList.find(function(x) { return x.nama === namaTarget; });
         prosesRenderBulanTunggakan(targetW);
       } else {
@@ -1161,7 +1167,7 @@ nav.bar-nav button:active { transform: scale(.96); }
           selB.disabled = false;
           if (res && res.warga) {
             tulisLS(res, tahunDipilih);
-            var wListBaru = prosesWargaClean(res.warga);
+            var wListBaru = prosesWargaClean(res.warga, tahunDipilih);
             var targetWBaru = wListBaru.find(function(x) { return x.nama === namaTarget; });
             prosesRenderBulanTunggakan(targetWBaru);
           } else {
