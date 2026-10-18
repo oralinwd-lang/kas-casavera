@@ -525,12 +525,23 @@ nav.bar-nav button:active { transform: scale(.96); }
     </div>
   </div>
 
-  <!-- MODAL 2: PORTAL KHUSUS WARGA (RINGKAS & PRIVAT) -->
+  <!-- MODAL 2: PORTAL KHUSUS WARGA (DENGAN TAHUN & SEARCH NAMA/BLOK) -->
   <div class="modal" id="m-portal" hidden data-close>
     <div class="sheet">
       <h3>Cek Iuran Rumah Saya</h3>
-      <p style="margin:0" class="note">Pilih blok rumah Anda untuk melihat status iuran secara privat.</p>
-      <label>Pilih Blok Rumah
+      <p style="margin:0" class="note">Pilih tahun dan unit rumah Anda untuk melihat riwayat iuran secara privat.</p>
+      
+      <!-- Pilihan Tahun & Kolom Search Nama/Blok Rumah -->
+      <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;align-items:end;">
+        <label>Tahun
+          <select class="input" id="selPortalTahun"></select>
+        </label>
+        <label>Cari Nama / Blok
+          <input class="input" type="search" id="cariPortalWarga" placeholder="Ketik nama / blok..." autocomplete="off">
+        </label>
+      </div>
+
+      <label>Pilih Unit Rumah
         <select class="input" id="selPortalBlok"></select>
       </label>
       <div id="portalWargaKonten"></div>
@@ -660,7 +671,6 @@ nav.bar-nav button:active { transform: scale(.96); }
 
   var GAS_URL = 'https://script.google.com/macros/s/AKfycbxTK-7hIlKVySlAvKw4flzOxa4Fq-pnY9yeJjNkd3LFlgrtub3_o8MR3wznC-pV5LDo/exec';
 
-  // Percepat muat awal: permintaan data tahun berjalan dikirim segera, tanpa menunggu skrip lain selesai disiapkan.
   var PF = null;
   try {
     var pfU = GAS_URL.split('?')[0].trim().replace(/\/+$/, ''), pfT = Math.min(2026, Math.max(2024, new Date().getFullYear()));
@@ -787,10 +797,8 @@ nav.bar-nav button:active { transform: scale(.96); }
     return (wargaRaw || []).map(function(w) {
       var isBebas = w.bebasIuran || /bebas/i.test(w.statusHunian) || /iqbal/i.test(w.nama);
       var sb = Object.assign({}, w.statusBulan);
-      // Iuran baru aktif Maret 2024: Januari-Februari 2024 dihapus dari perhitungan.
       if (thn === 2024) for (var mb = 1; mb <= 2; mb++) sb[mb] = { lunas: false, nominal: 0, status: 'Belum Aktif', kosong: true, belumMasuk: true, belumAktif: true };
       if (isBebas) {
-        // Bebas iuran: Lunas otomatis pada tanggal 20 tiap bulan (bulan lampau sudah Lunas); bulan depan tidak ikut Lunas.
         for (var m = 1; m <= 12; m++) {
           var depan = thn > NOW.getFullYear() || (thn === NOW.getFullYear() && m > NOW.getMonth() + 1);
           var belumTgl20 = thn === NOW.getFullYear() && m === NOW.getMonth() + 1 && NOW.getDate() < 20;
@@ -823,6 +831,7 @@ nav.bar-nav button:active { transform: scale(.96); }
     };
 
     isiOpsiWargaBayar();
+    if ($('m-portal') && !$('m-portal').hidden) tampilkanPortalRumah();
   }
 
   function muat(paksa) {
@@ -1128,21 +1137,48 @@ nav.bar-nav button:active { transform: scale(.96); }
     renderWarga(); renderMutasi(); renderLaporan(); renderInfo();
   }
 
-  // Pengisian Dropdown Warga (Blok Rumah Ditampilkan Hanya Sekali)
-  function isiOpsiWargaBayar() {
+  // Pengisian Dropdown Warga (Termasuk Filter Pencarian Nama/Blok pada Modal Portal)
+  function isiOpsiWargaBayar(qPortal) {
     var selPortal = $('selPortalBlok'), selLapor = $('laporNamaWarga');
     if (!S.d.warga.length) return;
-    var opt = '<option value="">-- Pilih Unit Anda --</option>';
-    S.d.warga.forEach(function(w, idx) {
-      if (w.pindah) return;
-      var label = esc(w.nama);
-      if (label.indexOf('(') < 0 && w.blok && w.blok !== '-') {
-        label += ' (Blok ' + esc(w.blok) + ')';
+
+    if (selLapor) {
+      var optLapor = '<option value="">-- Pilih Unit Anda --</option>';
+      S.d.warga.forEach(function(w, idx) {
+        if (w.pindah) return;
+        var label = esc(w.nama);
+        if (label.indexOf('(') < 0 && w.blok && w.blok !== '-') {
+          label += ' (Blok ' + esc(w.blok) + ')';
+        }
+        optLapor += '<option value="' + idx + '">' + label + '</option>';
+      });
+      selLapor.innerHTML = optLapor;
+    }
+
+    if (selPortal) {
+      var curVal = selPortal.value;
+      var q = String(qPortal !== undefined ? qPortal : ($('cariPortalWarga') ? $('cariPortalWarga').value : '')).toLowerCase().trim();
+      var optPortal = '<option value="">-- Pilih Unit Anda --</option>';
+      var matchedIdx = -1, matchCount = 0;
+      S.d.warga.forEach(function(w, idx) {
+        if (w.pindah) return;
+        var label = esc(w.nama);
+        if (label.indexOf('(') < 0 && w.blok && w.blok !== '-') {
+          label += ' (Blok ' + esc(w.blok) + ')';
+        }
+        if (!q || label.toLowerCase().indexOf(q) >= 0 || String(w.blok).toLowerCase().indexOf(q) >= 0) {
+          optPortal += '<option value="' + idx + '">' + label + '</option>';
+          if (matchedIdx === -1) matchedIdx = idx;
+          matchCount++;
+        }
+      });
+      selPortal.innerHTML = optPortal;
+      if (curVal !== '' && selPortal.querySelector('option[value="' + curVal + '"]')) {
+        selPortal.value = curVal;
+      } else if (q && matchCount === 1) {
+        selPortal.value = matchedIdx;
       }
-      opt += '<option value="' + idx + '">' + label + '</option>';
-    });
-    if (selPortal) selPortal.innerHTML = opt;
-    if (selLapor) selLapor.innerHTML = opt;
+    }
   }
 
   // Pengisian Dropdown Tahun pada Form Lapor Bayar
@@ -1172,11 +1208,9 @@ nav.bar-nav button:active { transform: scale(.96); }
     var tahunDipilih = Number(selT ? selT.value : S.tahun) || S.tahun;
     var namaTarget = S.d.warga[idx].nama;
 
-    // Jika tahun yang dipilih sama dengan tahun aktif di aplikasi
     if (tahunDipilih === S.tahun) {
       prosesRenderBulanTunggakan(S.d.warga[idx]);
     } else {
-      // Ambil data dari cache lokal atau server untuk tahun yang berbeda
       var cached = bacaLS(tahunDipilih);
       if (cached && cached.warga) {
         var wList = prosesWargaClean(cached.warga, tahunDipilih);
@@ -1232,6 +1266,7 @@ nav.bar-nav button:active { transform: scale(.96); }
   function tampilkanPortalRumah() {
     var sel = $('selPortalBlok');
     var box = $('portalWargaKonten');
+    if (!box) return;
     var idx = sel ? sel.value : '';
     if (idx === '' || !S.d.warga[idx]) {
       box.innerHTML = '<div class="empty">Silakan pilih unit rumah Anda di atas.</div>';
@@ -1248,11 +1283,11 @@ nav.bar-nav button:active { transform: scale(.96); }
     box.innerHTML = 
       '<div class="item" style="border:1.5px solid var(--accent);margin-top:8px">' +
         '<div class="h">' +
-          '<div><b style="font-size:16px">' + esc(w.nama) + '</b><div class="note">Blok ' + esc(w.blok) + ' · ' + esc(w.statusHunian) + '</div></div>' +
+          '<div><b style="font-size:16px">' + esc(w.nama) + '</b><div class="note">Blok ' + esc(w.blok) + ' · ' + esc(w.statusHunian) + ' · Tahun ' + S.tahun + '</div></div>' +
           pillStatus(st(w, S.bulan)) +
         '</div>' +
         '<div class="dots" style="margin:6px 0">' + dots + '</div>' +
-        (w.tunggakanBulan > 0 ? '<div style="color:var(--bad);font-weight:700">Tunggakan: ' + w.tunggakanBulan + ' bulan (' + rp(w.tunggakanRp) + ')</div>' : '<div style="color:var(--ok);font-weight:700">Status: Semua iuran lunas / tidak ada tunggakan</div>') +
+        (w.tunggakanBulan > 0 ? '<div style="color:var(--bad);font-weight:700">Tunggakan: ' + w.tunggakanBulan + ' bulan (' + rp(w.tunggakanRp) + ')</div>' : '<div style="color:var(--ok);font-weight:700">Status: Semua iuran ' + S.tahun + ' lunas / tidak ada tunggakan</div>') +
         '<div style="display:flex;gap:8px;margin-top:4px">' +
           '<button class="btn" style="flex:1" data-act="bayarRumahIni">Bayar Iuran</button>' +
           '<button class="btn ghost" style="flex:1" data-act="laporRumahIni" data-w="' + idx + '">Lapor Transfer</button>' +
@@ -1318,6 +1353,9 @@ nav.bar-nav button:active { transform: scale(.96); }
     else if (a === 'toggleSaldo') { S.sembunyi = !S.sembunyi; renderHero(); }
     else if (a === 'dana') bukaModal('m-dana');
     else if (a === 'bukaPortalWarga') {
+      if ($('selPortalTahun')) $('selPortalTahun').value = S.tahun;
+      if ($('cariPortalWarga')) $('cariPortalWarga').value = '';
+      isiOpsiWargaBayar();
       bukaModal('m-portal');
       tampilkanPortalRumah();
     }
@@ -1551,6 +1589,7 @@ nav.bar-nav button:active { transform: scale(.96); }
     var thn = '', i; S.tahun = Math.min(2026, Math.max(2024, S.tahun));
     for (i = 2024; i <= 2026; i++) thn += '<option value="' + i + '"' + (i === S.tahun ? ' selected' : '') + '>' + i + '</option>';
     $('selTahun').innerHTML = thn;
+    if ($('selPortalTahun')) $('selPortalTahun').innerHTML = thn;
     var bl = ''; for (i = 1; i <= 12; i++) bl += '<option value="' + i + '"' + (i === S.bulan ? ' selected' : '') + '>' + NAMA_BULAN[i] + '</option>';
     $('selBulan').innerHTML = bl;
     $('kKat').innerHTML = KAT_KELUAR.map(function (k) { return '<option>' + esc(k) + '</option>'; }).join('');
@@ -1561,7 +1600,30 @@ nav.bar-nav button:active { transform: scale(.96); }
       if (lama && S.bulan < 3) { S.bulan = 3; $('selBulan').value = 3; }
     }
     aturBulanAktif();
-    $('selTahun').addEventListener('change', function () { S.tahun = Number(this.value); aturBulanAktif(); muat(); });
+
+    $('selTahun').addEventListener('change', function () {
+      S.tahun = Number(this.value);
+      if ($('selPortalTahun')) $('selPortalTahun').value = this.value;
+      aturBulanAktif();
+      muat();
+    });
+
+    if ($('selPortalTahun')) {
+      $('selPortalTahun').addEventListener('change', function () {
+        S.tahun = Number(this.value);
+        if ($('selTahun')) $('selTahun').value = this.value;
+        aturBulanAktif();
+        muat();
+      });
+    }
+
+    if ($('cariPortalWarga')) {
+      $('cariPortalWarga').addEventListener('input', function () {
+        isiOpsiWargaBayar(this.value);
+        tampilkanPortalRumah();
+      });
+    }
+
     $('selBulan').addEventListener('change', function () { S.bulan = Number(this.value); renderIuran(); renderWarga(); renderLaporan(); });
     $('cariWarga').addEventListener('input', function () { S.limW = 10; renderWarga(); tampilDD('warga'); });
     $('cariMutasi').addEventListener('input', function () { S.limM = 10; renderMutasi(); tampilDD('mutasi'); });
