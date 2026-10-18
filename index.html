@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <base target="_top">
 <title>Kas Digital Casavera</title>
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
 <style>
 :root {
@@ -656,6 +659,17 @@ nav.bar-nav button:active { transform: scale(.96); }
   'use strict';
 
   var GAS_URL = 'https://script.google.com/macros/s/AKfycbxTK-7hIlKVySlAvKw4flzOxa4Fq-pnY9yeJjNkd3LFlgrtub3_o8MR3wznC-pV5LDo/exec';
+
+  // Percepat muat awal: permintaan data tahun berjalan dikirim segera, tanpa menunggu skrip lain selesai disiapkan.
+  var PF = null;
+  try {
+    var pfU = GAS_URL.split('?')[0].trim().replace(/\/+$/, ''), pfT = Math.min(2026, Math.max(2024, new Date().getFullYear()));
+    if (pfU.indexOf('http') === 0) {
+      PF = { t: pfT, at: Date.now(), p: fetch(pfU + '?action=getData&tahun=' + pfT, { method: 'GET', redirect: 'follow', cache: 'no-store' })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP Status ' + r.status); return r.json(); }) };
+      PF.p.catch(function () {});
+    }
+  } catch (e) { PF = null; }
   var NOMOR_WA_SECURITY = '0859-7372-7773';
 
   var NB = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
@@ -700,6 +714,12 @@ nav.bar-nav button:active { transform: scale(.96); }
 
     if (fn === 'getKasDanStatusWarga') {
       var thn = args[0] || new Date().getFullYear();
+      if (PF && PF.t === Number(thn) && Date.now() - PF.at < 30000) {
+        var pfp = PF.p; PF = null;
+        pfp.then(function (data) { ok(data); }).catch(function (err) { fail({ message: 'Gagal mengambil data dari Google Sheet: ' + err.message }); });
+        return;
+      }
+      PF = null;
       var targetUrl = cleanUrl + '?action=getData&tahun=' + encodeURIComponent(thn) + '&_t=' + new Date().getTime();
 
       fetch(targetUrl, {
@@ -767,6 +787,8 @@ nav.bar-nav button:active { transform: scale(.96); }
     return (wargaRaw || []).map(function(w) {
       var isBebas = w.bebasIuran || /bebas/i.test(w.statusHunian) || /iqbal/i.test(w.nama);
       var sb = Object.assign({}, w.statusBulan);
+      // Iuran baru aktif Maret 2024: Januari-Februari 2024 dihapus dari perhitungan.
+      if (thn === 2024) for (var mb = 1; mb <= 2; mb++) sb[mb] = { lunas: false, nominal: 0, status: 'Belum Aktif', kosong: true, belumMasuk: true, belumAktif: true };
       if (isBebas) {
         // Bebas iuran: Lunas otomatis pada tanggal 20 tiap bulan (bulan lampau sudah Lunas); bulan depan tidak ikut Lunas.
         for (var m = 1; m <= 12; m++) {
@@ -1274,7 +1296,7 @@ nav.bar-nav button:active { transform: scale(.96); }
     }
     var bisa = !w.pindah && !s.lunas && !s.kosong && !s.belumMasuk && !S.menyimpan;
     var nominal = S.d.biayaIuran - (s.nominal || 0);
-    var info = w.pindah ? 'Warga ini sudah pindah.' : s.belumMasuk ? 'Bulan ini warga belum masuk/tinggal di Casavera.' : s.lunas ? 'Bulan ini sudah lunas.' : s.kosong ? 'Belum ada kolomnya di sheet rekap.' : 'Akan dicatat pemasukan ' + rp(nominal) + ' di sheet Transaksi.';
+    var info = w.pindah ? 'Warga ini sudah pindah.' : s.belumAktif ? 'Iuran Casavera baru aktif Maret 2024.' : s.belumMasuk ? 'Bulan ini warga belum masuk/tinggal di Casavera.' : s.lunas ? 'Bulan ini sudah lunas.' : s.kosong ? 'Belum ada kolomnya di sheet rekap.' : 'Akan dicatat pemasukan ' + rp(nominal) + ' di sheet Transaksi.';
     $('verifBody').innerHTML = '<h3>Verifikasi iuran</h3><div><b>' + esc(w.nama) + '</b><div class="note">Blok ' + esc(w.blok) + ' · ' + esc(w.statusHunian) + '</div></div>' +
       '<label>Bulan iuran<select class="input" id="selBulanVerif">' + opsi + '</select></label><div class="' + (bisa ? 'note' : 'err-text') + '">' + info + '</div><div class="err-text" id="vErr" hidden></div>' +
       '<button class="btn" data-act="simpanVerif"' + (bisa ? '' : ' disabled') + '>' + (S.menyimpan ? 'Menyimpan…' : 'Tandai lunas') + '</button><button class="btn ghost" data-act="tutup">Batal</button>';
@@ -1533,7 +1555,13 @@ nav.bar-nav button:active { transform: scale(.96); }
     $('selBulan').innerHTML = bl;
     $('kKat').innerHTML = KAT_KELUAR.map(function (k) { return '<option>' + esc(k) + '</option>'; }).join('');
 
-    $('selTahun').addEventListener('change', function () { S.tahun = Number(this.value); muat(); });
+    function aturBulanAktif() {
+      var o = $('selBulan').options, lama = S.tahun === 2024;
+      for (var k = 0; k < o.length; k++) { var off = lama && Number(o[k].value) < 3; o[k].disabled = off; o[k].hidden = off; }
+      if (lama && S.bulan < 3) { S.bulan = 3; $('selBulan').value = 3; }
+    }
+    aturBulanAktif();
+    $('selTahun').addEventListener('change', function () { S.tahun = Number(this.value); aturBulanAktif(); muat(); });
     $('selBulan').addEventListener('change', function () { S.bulan = Number(this.value); renderIuran(); renderWarga(); renderLaporan(); });
     $('cariWarga').addEventListener('input', function () { S.limW = 10; renderWarga(); tampilDD('warga'); });
     $('cariMutasi').addEventListener('input', function () { S.limM = 10; renderMutasi(); tampilDD('mutasi'); });
