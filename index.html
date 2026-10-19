@@ -83,7 +83,6 @@ button { cursor: pointer; }
 .input { width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); }
 .list { display: grid; gap: 8px; }
 .item { background: var(--surface); border: 1px solid var(--line); border-radius: 13px; padding: 11px 12px; display: grid; gap: 7px; min-width: 0; transition: border-color .15s; }
-.item.tap { cursor: pointer; }
 .item.tap:hover { border-color: var(--accent); }
 .item .h { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
 .item .n { font-weight: 700; overflow-wrap: anywhere; }
@@ -132,7 +131,7 @@ th:first-child, td:first-child { text-align: left; }
 .sb-logo { display: none; }
 .pick { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 6px 0; margin-bottom: 4px; }
 
-/* Keyframes Animasi Dashboard & Chart */
+/* Keyframes Animasi */
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @keyframes barBounce { 0% { transform: scaleY(0); } 70% { transform: scaleY(1.08); } 100% { transform: scaleY(1); } }
 @keyframes lineSweep { to { stroke-dashoffset: 0; } }
@@ -169,7 +168,7 @@ th:first-child, td:first-child { text-align: left; }
 .trend { display: inline-flex; align-items: center; gap: 6px; width: fit-content; font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 99px; background: rgba(255,255,255,.16); }
 .trend.up { color: #8af5b4; } .trend.down { color: #ffb99a; } .trend.flat { color: #dbe4f3; }
 
-/* Desktop: Sidebar Auto Expand on Hover & Grid Rapat */
+/* Desktop */
 @media screen and (min-width: 1024px) {
   body { padding-left: 68px; }
   nav.bar-nav {
@@ -507,16 +506,8 @@ nav.bar-nav button:active { transform: scale(.96); }
       <div class="card" style="text-align:center">
         <div class="note">Nomor DANA Resmi </div>
         <b style="font-size:22px;letter-spacing:.04em">0859-7372-7773</b>
-        <div class="note" style="margin-top:4px">Atas Nama: Asep Rudi Hartono</div>
+        <div class="note" style="margin-top:4px">Atas Nama: Kas Casavera</div>
         <button class="btn ghost" style="margin-top:8px;width:100%" data-act="salin">Salin Nomor DANA</button>
-      </div>
-
-      <!-- KARTU REKENING BANK BARU -->
-      <div class="card" style="text-align:center">
-        <div class="note">Rekening Sea Bank</div>
-        <b style="font-size:22px;letter-spacing:.04em">901375156986</b>
-        <div class="note" style="margin-top:4px">Atas Nama: Asep Rudi Hartono</div>
-        <button class="btn ghost" style="margin-top:8px;width:100%" data-act="salinRekening">Salin Nomor Rekening</button>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -980,7 +971,7 @@ nav.bar-nav button:active { transform: scale(.96); }
       '<div class="big"' + (S.sembunyi ? '' : ' data-key="saldo" data-count="' + d.saldoUtama + '"') + '>' + (S.sembunyi ? 'Rp ••••••' : rp(d.saldoUtama)) + '</div>' + tHtml +
       '<div class="row"><div class="mini"><span>Masuk ' + S.tahun + '</span><b data-key="masuk" data-count="' + d.uangMasuk + '">' + rp(d.uangMasuk) + '</b></div><div class="mini"><span>Keluar ' + S.tahun + '</span><b data-key="keluar" data-count="' + d.uangKeluar + '">' + rp(d.uangKeluar) + '</b></div></div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
-        '<button class="btn light" data-act="dana">BAYAR</button>' +
+        '<button class="btn light" data-act="dana">Bayar via DANA</button>' +
         '<button class="btn security" data-act="security">🛡️ Pos Security</button>' +
       '</div>' +
       '<div style="font-size:11px;opacity:.8">' + (d.audit ? 'Dibaca dari Google Sheet ' + esc(d.audit.waktuBaca) : '') + '</div>';
@@ -1554,7 +1545,6 @@ nav.bar-nav button:active { transform: scale(.96); }
     else if (a === 'xlsRingkasan') exelRingkasan();
     else if (a === 'xlsIuran') excelIuran();
     else if (a === 'salin') salinNomorCustom('085973727773', 'Nomor DANA disalin');
-    else if (a === 'salinRekening') salinNomorCustom('901375156986', 'Nomor rekening disalin');
     else if (a === 'bukaKeluar') { $('kTgl').value = new Date(NOW.getTime() - NOW.getTimezoneOffset() * 60000).toISOString().slice(0, 10); pesan('kErr', ''); bukaModal('m-keluar'); }
     else if (a === 'bukaInfo') { pesan('pErr', ''); bukaModal('m-info'); }
     else if (a === 'simpanVerif') simpanVerif();
@@ -1660,8 +1650,8 @@ nav.bar-nav button:active { transform: scale(.96); }
       h.setUint16(10, 0, true); h.setUint16(12, 0x21, true); h.setUint32(14, crc, true); h.setUint32(18, sz, true); h.setUint32(22, sz, true); h.setUint16(26, n.length, true); h.setUint16(28, 0, true);
       parts.push(new Uint8Array(h.buffer), n, f.data);
       var c = new DataView(new ArrayBuffer(46));
-      c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 0x0800, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true);
-      c.setUint16(12, 0, true); c.setUint16(14, 0x21, true); c.setUint32(16, crc, true); c.setUint32(20, sz, true); c.setUint32(24, sz, true); c.setUint16(28, n.length, true);
+      c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 0x0800, true); c.setUint16(8, 0, true);
+      c.setUint16(10, 0, true); c.setUint16(12, 0, true); c.setUint16(14, 0x21, true); c.setUint32(16, crc, true); c.setUint32(20, sz, true); c.setUint32(24, sz, true); c.setUint16(28, n.length, true);
       c.setUint32(42, off, true);
       central.push(new Uint8Array(c.buffer), n);
       off += 30 + n.length + sz;
