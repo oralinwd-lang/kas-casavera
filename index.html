@@ -507,8 +507,16 @@ nav.bar-nav button:active { transform: scale(.96); }
       <div class="card" style="text-align:center">
         <div class="note">Nomor DANA Resmi </div>
         <b style="font-size:22px;letter-spacing:.04em">0859-7372-7773</b>
-        <div class="note" style="margin-top:4px">Atas Nama: Kas Casavera</div>
+        <div class="note" style="margin-top:4px">Atas Nama: Asep Rudi Hartono</div>
         <button class="btn ghost" style="margin-top:8px;width:100%" data-act="salin">Salin Nomor DANA</button>
+      </div>
+
+      <!-- KARTU REKENING BANK BARU -->
+      <div class="card" style="text-align:center">
+        <div class="note">Rekening Sea Bank</div>
+        <b style="font-size:22px;letter-spacing:.04em">901375156986</b>
+        <div class="note" style="margin-top:4px">Atas Nama: Asep Rudi Hartono</div>
+        <button class="btn ghost" style="margin-top:8px;width:100%" data-act="salinRekening">Salin Nomor Rekening</button>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -1546,6 +1554,7 @@ nav.bar-nav button:active { transform: scale(.96); }
     else if (a === 'xlsRingkasan') exelRingkasan();
     else if (a === 'xlsIuran') excelIuran();
     else if (a === 'salin') salinNomorCustom('085973727773', 'Nomor DANA disalin');
+    else if (a === 'salinRekening') salinNomorCustom('901375156986', 'Nomor rekening disalin');
     else if (a === 'bukaKeluar') { $('kTgl').value = new Date(NOW.getTime() - NOW.getTimezoneOffset() * 60000).toISOString().slice(0, 10); pesan('kErr', ''); bukaModal('m-keluar'); }
     else if (a === 'bukaInfo') { pesan('pErr', ''); bukaModal('m-info'); }
     else if (a === 'simpanVerif') simpanVerif();
