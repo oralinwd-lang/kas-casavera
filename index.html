@@ -506,8 +506,15 @@ nav.bar-nav button:active { transform: scale(.96); }
       <div class="card" style="text-align:center">
         <div class="note">Nomor DANA Resmi </div>
         <b style="font-size:22px;letter-spacing:.04em">0859-7372-7773</b>
-        <div class="note" style="margin-top:4px">Atas Nama: Kas Casavera</div>
+        <div class="note" style="margin-top:4px">Atas Nama: Asep Rudi Hartono</div>
         <button class="btn ghost" style="margin-top:8px;width:100%" data-act="salin">Salin Nomor DANA</button>
+      </div>
+
+      <div class="card" style="text-align:center">
+        <div class="note">Rekening Sea Bank</div>
+        <b style="font-size:22px;letter-spacing:.04em">901375156986</b>
+        <div class="note" style="margin-top:4px">Atas Nama: Asep Rudi Hartono</div>
+        <button class="btn ghost" style="margin-top:8px;width:100%" data-act="salinRekening">Salin Nomor Rekening</button>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -563,7 +570,7 @@ nav.bar-nav button:active { transform: scale(.96); }
         <input class="input" id="laporNominal" type="number" required>
       </label>
       <label>Catatan / Nomor Referensi (Opsional)
-        <input class="input" id="laporCatatan" placeholder="mis. Transfer via BCA / DANA jam 10 pagi">
+        <input class="input" id="laporCatatan" placeholder="mis. Transfer via Sea Bank / DANA jam 10 pagi">
       </label>
       <div class="err-text" id="laporErr" hidden></div>
       <button class="btn" type="submit" id="btnKirimLapor">Kirim Bukti / Lapor</button>
@@ -971,7 +978,7 @@ nav.bar-nav button:active { transform: scale(.96); }
       '<div class="big"' + (S.sembunyi ? '' : ' data-key="saldo" data-count="' + d.saldoUtama + '"') + '>' + (S.sembunyi ? 'Rp ••••••' : rp(d.saldoUtama)) + '</div>' + tHtml +
       '<div class="row"><div class="mini"><span>Masuk ' + S.tahun + '</span><b data-key="masuk" data-count="' + d.uangMasuk + '">' + rp(d.uangMasuk) + '</b></div><div class="mini"><span>Keluar ' + S.tahun + '</span><b data-key="keluar" data-count="' + d.uangKeluar + '">' + rp(d.uangKeluar) + '</b></div></div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
-        '<button class="btn light" data-act="dana">Bayar via DANA</button>' +
+        '<button class="btn light" data-act="dana">BAYAR</button>' +
         '<button class="btn security" data-act="security">🛡️ Pos Security</button>' +
       '</div>' +
       '<div style="font-size:11px;opacity:.8">' + (d.audit ? 'Dibaca dari Google Sheet ' + esc(d.audit.waktuBaca) : '') + '</div>';
@@ -1545,6 +1552,7 @@ nav.bar-nav button:active { transform: scale(.96); }
     else if (a === 'xlsRingkasan') exelRingkasan();
     else if (a === 'xlsIuran') excelIuran();
     else if (a === 'salin') salinNomorCustom('085973727773', 'Nomor DANA disalin');
+    else if (a === 'salinRekening') salinNomorCustom('901375156986', 'Nomor rekening disalin');
     else if (a === 'bukaKeluar') { $('kTgl').value = new Date(NOW.getTime() - NOW.getTimezoneOffset() * 60000).toISOString().slice(0, 10); pesan('kErr', ''); bukaModal('m-keluar'); }
     else if (a === 'bukaInfo') { pesan('pErr', ''); bukaModal('m-info'); }
     else if (a === 'simpanVerif') simpanVerif();
