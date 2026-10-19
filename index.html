@@ -246,9 +246,7 @@ th:first-child, td:first-child { text-align: left; }
   .draw { animation: none !important; stroke-dasharray: none; stroke-dashoffset: 0; }
   .bar > div { transition: none !important; }
 }
-/* ============================================================
-   TEMA GELAP "ICE GLASS" (tanpa ungu) - hanya tampilan & motion
-   ============================================================ */
+
 :root { --glass-line: rgba(186,230,253,.22); --glow: 56,189,248; --solid: #0b1a2b; }
 body {
   background:
@@ -267,7 +265,6 @@ option { background: #0b1a2b; color: #e8f6ff; }
 .logo svg rect, .sb-logo svg rect { fill: #0b78a6; }
 .logo svg, .sb-logo svg { filter: drop-shadow(0 4px 12px rgba(56,189,248,.55)); }
 
-/* ---- Kartu & daftar */
 .card {
   background: linear-gradient(160deg, rgba(255,255,255,.09), rgba(255,255,255,.03));
   border: 1px solid var(--glass-line);
@@ -283,7 +280,6 @@ option { background: #0b1a2b; color: #e8f6ff; }
 .pick { background: rgba(4,16,28,.55); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
 @media screen and (min-width: 1024px) { .pick { background: none; -webkit-backdrop-filter: none; backdrop-filter: none; } }
 
-/* ---- Hero */
 .hero {
   background: linear-gradient(145deg, rgba(8,48,84,.94), rgba(13,102,148,.84) 55%, rgba(22,148,184,.76));
   border: 1px solid rgba(186,230,253,.32);
@@ -292,7 +288,6 @@ option { background: #0b1a2b; color: #e8f6ff; }
 .hero::before { content: ""; position: absolute; right: -70px; top: -90px; width: 260px; height: 260px; border-radius: 50%; pointer-events: none; background: radial-gradient(circle, rgba(255,255,255,.16), transparent 66%); animation: drift1 12s ease-in-out infinite alternate; }
 .hero .mini { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2); box-shadow: inset 0 1px 0 rgba(255,255,255,.2); }
 
-/* ---- Tombol: ice glass + motion */
 .btn, .chip, .eye, .more, .seg button, nav.bar-nav button { position: relative; overflow: hidden; isolation: isolate; }
 .btn, .chip, .eye {
   -webkit-backdrop-filter: blur(12px) saturate(160%); backdrop-filter: blur(12px) saturate(160%);
@@ -328,7 +323,6 @@ option { background: #0b1a2b; color: #e8f6ff; }
 .seg button.on { color: #03192a; font-weight: 700; background: linear-gradient(180deg, rgba(200,242,255,.96), rgba(56,189,248,.84)); border-color: rgba(255,255,255,.55); box-shadow: inset 0 1px 0 rgba(255,255,255,.75), 0 8px 20px -8px rgba(var(--glow),.75); }
 .rip { position: absolute; z-index: -1; border-radius: 50%; pointer-events: none; background: radial-gradient(circle, rgba(255,255,255,.6), rgba(255,255,255,0) 70%); transform: scale(0); animation: ripple .7s ease-out forwards; }
 
-/* ---- Sidebar & menu bawah (ice glass) */
 nav.bar-nav {
   background: linear-gradient(180deg, rgba(22,48,78,.58), rgba(8,22,38,.52));
   -webkit-backdrop-filter: blur(24px) saturate(170%); backdrop-filter: blur(24px) saturate(170%);
@@ -351,7 +345,6 @@ nav.bar-nav button:active { transform: scale(.96); }
 }
 .sb-logo { border-bottom-color: var(--glass-line); }
 
-/* ---- Jendela (modal) */
 .modal { background: rgba(2,10,20,.5); -webkit-backdrop-filter: blur(8px) saturate(130%); backdrop-filter: blur(8px) saturate(130%); animation: modalIn .28s ease both; }
 .sheet {
   background: linear-gradient(165deg, rgba(28,56,88,.9), rgba(9,24,42,.92));
@@ -369,7 +362,6 @@ nav.bar-nav button:active { transform: scale(.96); }
 .tip { background: rgba(10,26,44,.82); border-color: var(--glass-line); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); animation: tipIn .18s ease both; }
 .toast { background: rgba(10,30,50,.86); color: #e8f6ff; border: 1px solid var(--glass-line); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); box-shadow: 0 14px 40px -12px rgba(var(--glow),.45); animation: toastIn .4s cubic-bezier(.2,.9,.25,1.2) both; }
 
-/* ---- Grafik & bar */
 .bar > div { position: relative; overflow: hidden; background: linear-gradient(90deg, #2dd4bf, #38bdf8); box-shadow: 0 0 14px rgba(56,189,248,.5); }
 .bar > div::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.55) 50%, transparent 70%); background-size: 220% 100%; animation: barShine 2.8s linear infinite; }
 .kat .t div { background: linear-gradient(90deg, #ffa062, #ffd9a0); box-shadow: 0 0 10px rgba(255,160,98,.4); }
@@ -460,6 +452,7 @@ nav.bar-nav button:active { transform: scale(.96); }
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn" id="btnTagih" data-act="bukaTagih" hidden>Tagih iuran via WhatsApp</button>
         <button class="btn ghost" id="btnAntreanLapor" data-act="bukaAntreanLapor" hidden>Antrean Lapor Bayar Warga</button>
+        <button class="btn ghost" id="btnAturTarif" data-act="bukaAturTarif" hidden>⚙️ Atur Tarif Iuran</button>
       </div>
       <div class="note" id="infoWarga"></div>
       <div class="list" id="v-warga"></div>
@@ -507,7 +500,7 @@ nav.bar-nav button:active { transform: scale(.96); }
 
       <div class="card" style="text-align:center;background:var(--accent-soft)">
         <span class="note" style="color:var(--accent);font-weight:600">Nominal Iuran Bulanan</span>
-        <b style="font-size:26px;color:var(--accent);display:block;letter-spacing:-.01em">Rp 60.000 <span style="font-size:13px;font-weight:600">/ bulan</span></b>
+        <b style="font-size:26px;color:var(--accent);display:block;letter-spacing:-.01em" id="labelNominalDana">Rp 60.000 <span style="font-size:13px;font-weight:600">/ bulan</span></b>
         <span class="note" style="font-size:11.5px">Transfer sesuai jumlah bulan iuran Anda, lalu konfirmasi via tombol Lapor di bawah.</span>
       </div>
 
@@ -587,6 +580,42 @@ nav.bar-nav button:active { transform: scale(.96); }
       <div class="list" id="v-antrean"></div>
       <button class="btn ghost" data-act="tutup">Tutup</button>
     </div>
+  </div>
+
+  <!-- MODAL 5: ATUR TARIF IURAN BULANAN (KHUSUS ADMIN PENGURUS) -->
+  <div class="modal" id="m-tarif" hidden data-close>
+    <form class="sheet" id="f-tarif">
+      <h3>Pengaturan Tarif Iuran Bulanan</h3>
+      <p class="note" style="margin:0">Iuran default terkunci di Rp 60.000. Pengurus dapat membuka kunci untuk bulan tertentu (misal: THR Idul Fitri Rp 120.000).</p>
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <label>Pilih Tahun
+          <select class="input" id="tarifTahun"></select>
+        </label>
+        <label>Pilih Bulan
+          <select class="input" id="tarifBulan"></select>
+        </label>
+      </div>
+
+      <label>Nominal Iuran Bulan Ini (Rp)
+        <input class="input" id="tarifNominal" type="number" step="5000" min="10000" required>
+      </label>
+
+      <div class="note" id="tarifInfoKunci">Status: Terkunci di Rp 60.000 (Default)</div>
+      <div class="err-text" id="tarifErr" hidden></div>
+
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn" type="submit" id="btnSimpanTarif" style="flex:1">Buka Kunci & Simpan</button>
+        <button class="btn ghost" type="button" data-act="resetTarifBulan" id="btnResetTarif" style="flex:1">Kunci Normal (Rp 60.000)</button>
+      </div>
+
+      <div style="margin-top:10px">
+        <b style="font-size:12.5px;display:block;margin-bottom:6px">Daftar Bulan Khusus Terbuka:</b>
+        <div id="v-daftarTarif" class="list" style="gap:6px"></div>
+      </div>
+
+      <button class="btn ghost" type="button" data-act="tutup">Tutup</button>
+    </form>
   </div>
 
   <!-- MODAL: POS SECURITY -->
@@ -697,7 +726,7 @@ nav.bar-nav button:active { transform: scale(.96); }
   function kosong() {
     return { saldoUtama: 0, saldoAwal: 0, saldoAkhirLaporan: 0, uangMasuk: 0, uangKeluar: 0,
       pemasukanBulan: new Array(12).fill(0), pengeluaranBulan: new Array(12).fill(0), saldoBulan: new Array(12).fill(0),
-      listTransaksi: [], warga: [], daftarInfoWarga: [], audit: null, biayaIuran: 60000 };
+      listTransaksi: [], warga: [], daftarInfoWarga: [], audit: null, biayaIuran: 60000, biayaIuranDefault: 60000, tarifKhusus: {} };
   }
   var S = { tab: 'beranda', loading: true, galat: '', isAdmin: false, pin: '', sembunyi: false,
     tahun: NOW.getFullYear(), bulan: NOW.getMonth() + 1, d: kosong(), fWarga: 'semua', fMutasi: 'semua', limW: 10, limM: 10, tagih: null, tagihGalat: '', tagihMuat: false, cd: 0,
@@ -709,6 +738,17 @@ nav.bar-nav button:active { transform: scale(.96); }
   function isMasuk(t) { return String(t.tipe || '').toLowerCase().indexOf('masuk') >= 0; }
   function wajib() { return S.d.warga.filter(function (w) { return !w.pindah; }); }
   function st(w, m) { return (w.statusBulan && w.statusBulan[m]) || { lunas: false, nominal: 0, status: 'Tidak ada data', kosong: true }; }
+
+  // Fungsi tarif dinamis per bulan (kunci default 60.000 / buka khusus Maret dll)
+  function getTarifBulan(bln, thn) {
+    var t = thn || S.tahun;
+    var b = bln || S.bulan;
+    var kunci = t + '-' + b;
+    if (S.d.tarifKhusus && S.d.tarifKhusus[kunci] && Number(S.d.tarifKhusus[kunci]) > 0) {
+      return Number(S.d.tarifKhusus[kunci]);
+    }
+    return S.d.biayaIuranDefault || 60000;
+  }
 
   function toast(msg) {
     var t = $('toast'); t.textContent = msg; t.hidden = false;
@@ -755,6 +795,8 @@ nav.bar-nav button:active { transform: scale(.96); }
       payload.pinAdmin = args[0];
     } else if (fn === 'prosesLaporanBayar') {
       payload.idLapor = args[0]; payload.statusSetuju = args[1]; payload.pinAdmin = args[2];
+    } else if (fn === 'simpanSetelanTarif') {
+      payload.data = args[0]; payload.pinAdmin = args[1];
     } else if (fn === 'verifikasiIuran') {
       payload.namaWarga = args[0]; payload.bulan = args[1]; payload.tahun = args[2]; payload.pinAdmin = args[3];
     } else if (fn === 'tambahPengeluaran') {
@@ -827,7 +869,9 @@ nav.bar-nav button:active { transform: scale(.96); }
       uangMasuk: n(res.uangMasuk), uangKeluar: n(res.uangKeluar),
       pemasukanBulan: arr(res.pemasukanBulan), pengeluaranBulan: arr(res.pengeluaranBulan), saldoBulan: arr(res.saldoBulan),
       listTransaksi: res.listTransaksi || [], warga: wargaClean, daftarInfoWarga: res.daftarInfoWarga || [], 
-      audit: res.audit || null, biayaIuran: n(res.biayaIuran) || 60000 
+      audit: res.audit || null, biayaIuran: n(res.biayaIuran) || 60000,
+      biayaIuranDefault: n(res.biayaIuranDefault) || 60000,
+      tarifKhusus: res.tarifKhusus || {}
     };
 
     isiOpsiWargaBayar();
@@ -874,6 +918,7 @@ nav.bar-nav button:active { transform: scale(.96); }
     var a = $('btnAdmin'); a.textContent = S.isAdmin ? 'Pengurus aktif' : 'Masuk pengurus'; a.className = 'chip' + (S.isAdmin ? ' on' : '');
     $('btnKeluar').hidden = !S.isAdmin; $('btnInfo').hidden = !S.isAdmin; $('btnTagih').hidden = !S.isAdmin;
     $('btnAntreanLapor').hidden = !S.isAdmin;
+    if ($('btnAturTarif')) $('btnAturTarif').hidden = !S.isAdmin;
   }
   function renderNav() {
     $('nav').innerHTML = MENU.map(function (m) {
@@ -942,6 +987,9 @@ nav.bar-nav button:active { transform: scale(.96); }
     var tgk = S.d.warga.filter(function (x) { return x.tunggakanBulan > 0; });
     var tgkRp = tgk.reduce(function (a, x) { return a + x.tunggakanRp; }, 0);
     var berjalan = S.tahun === NOW.getFullYear() && b === NOW.getMonth() + 1;
+    var tarifBulanIni = getTarifBulan(b, S.tahun);
+    var isTarifKhusus = tarifBulanIni !== (S.d.biayaIuranDefault || 60000);
+
     $('jIuran').textContent = 'Iuran ' + NAMA_BULAN[b] + ' ' + S.tahun;
     if (!S.d.warga.length) { $('v-iuran').innerHTML = '<div class="empty">Belum ada data warga untuk tahun ' + S.tahun + '.</div>'; return; }
     $('v-iuran').innerHTML =
@@ -949,7 +997,7 @@ nav.bar-nav button:active { transform: scale(.96); }
       '<span class="note">' + (adaData ? lunas + ' dari ' + w.length + ' unit iuran sudah lunas' : 'Kolom bulan ini belum ada di sheet rekap') + '</span></div>' +
       '<div class="bar" style="margin-top:8px"><div id="barIuran" style="width:' + (anim && !reduced() ? 0 : (adaData ? pct : 0)) + '%;transition:width 1.1s cubic-bezier(.2,.8,.2,1)"></div></div>' +
       '<div class="stat" style="margin-top:10px"><div><small>Menunggak</small><b>' + tgk.length + ' warga</b></div><div><small>Total tunggakan</small><b>' + rp(tgkRp) + '</b></div></div>' +
-      '<p class="note" style="margin:8px 0 0">Iuran ' + rp(S.d.biayaIuran) + ' per bulan. ' + (berjalan ? 'Bulan berjalan belum dihitung sebagai tunggakan. ' : '') + '</p>';
+      '<p class="note" style="margin:8px 0 0">Iuran ' + (isTarifKhusus ? NAMA_BULAN[b] + ' ' + S.tahun + ' <b>' + rp(tarifBulanIni) + '</b> (Tarif Khusus / Buka Kunci)' : rp(tarifBulanIni) + ' per bulan') + '. ' + (berjalan ? 'Bulan berjalan belum dihitung sebagai tunggakan. ' : '') + '</p>';
     if (anim && !reduced()) {
       var bi = $('barIuran'), tp = adaData ? pct : 0;
       requestAnimationFrame(function () { requestAnimationFrame(function () { bi.style.width = tp + '%'; }); });
@@ -1079,7 +1127,8 @@ nav.bar-nav button:active { transform: scale(.96); }
       for (var m = 1; m <= 12; m++) {
         var s = st(w, m);
         var c = s.belumMasuk ? 'f' : s.pending ? 's' : s.lunas ? 'l' : s.status === 'Sebagian' ? 's' : (s.kosong || (S.tahun === NOW.getFullYear() && m >= NOW.getMonth() + 1) || S.tahun > NOW.getFullYear()) ? 'f' : '';
-        dots += '<span class="' + c + '" title="' + esc(NAMA_BULAN[m] + ': ' + s.status + (s.nominal ? ' ' + rp(s.nominal) : '')) + '">' + (s.belumMasuk ? '&ndash;' : NB[m]) + '</span>';
+        var tarifM = getTarifBulan(m, S.tahun);
+        dots += '<span class="' + c + '" title="' + esc(NAMA_BULAN[m] + ': ' + s.status + ' (' + rp(tarifM) + ')') + '">' + (s.belumMasuk ? '&ndash;' : NB[m]) + '</span>';
       }
       return '<div class="item' + (S.isAdmin ? ' tap' : '') + '" data-w="' + idx + '"><div class="h"><div style="min-width:0"><div class="n">' + esc(w.nama) + '</div><div class="s">Blok ' + esc(w.blok) + ' · ' + esc(w.statusHunian) +
         (w.tunggakanBulan > 0 ? ' · <b style="color:var(--bad)">menunggak ' + w.tunggakanBulan + ' bulan (' + rp(w.tunggakanRp) + ')</b>' : '') + '</div></div>' + pillStatus(st(w, S.bulan)) + '</div><div class="dots">' + dots + '</div></div>';
@@ -1129,7 +1178,7 @@ nav.bar-nav button:active { transform: scale(.96); }
     }).join('') : '<div class="empty">Belum ada pengumuman.</div>';
   }
   function renderAll() {
-    var dd = S.d, sig = [S.tahun, dd.saldoUtama, dd.uangMasuk, dd.uangKeluar, dd.pemasukanBulan.join(), dd.pengeluaranBulan.join()].join('|');
+    var dd = S.d, sig = [S.tahun, dd.saldoUtama, dd.uangMasuk, dd.uangKeluar, dd.pemasukanBulan.join(), dd.pengeluaranBulan.join(), JSON.stringify(dd.tarifKhusus)].join('|');
     var anim = sig !== S.sig && !!(dd.saldoUtama || dd.uangMasuk || dd.uangKeluar || dd.listTransaksi.length);
     S.sig = sig;
     renderBanner(); renderHeader(); renderNav(); renderHero(anim); renderIuran(anim); ukurChart(); renderChart('dash', anim); renderChart('saldo', anim);
@@ -1137,7 +1186,6 @@ nav.bar-nav button:active { transform: scale(.96); }
     renderWarga(); renderMutasi(); renderLaporan(); renderInfo();
   }
 
-  // Pengisian Dropdown Warga (Termasuk Filter Pencarian Nama/Blok pada Modal Portal)
   function isiOpsiWargaBayar(qPortal) {
     var selPortal = $('selPortalBlok'), selLapor = $('laporNamaWarga');
     if (!S.d.warga.length) return;
@@ -1147,9 +1195,7 @@ nav.bar-nav button:active { transform: scale(.96); }
       S.d.warga.forEach(function(w, idx) {
         if (w.pindah) return;
         var label = esc(w.nama);
-        if (label.indexOf('(') < 0 && w.blok && w.blok !== '-') {
-          label += ' (Blok ' + esc(w.blok) + ')';
-        }
+        if (label.indexOf('(') < 0 && w.blok && w.blok !== '-') label += ' (Blok ' + esc(w.blok) + ')';
         optLapor += '<option value="' + idx + '">' + label + '</option>';
       });
       selLapor.innerHTML = optLapor;
@@ -1163,9 +1209,7 @@ nav.bar-nav button:active { transform: scale(.96); }
       S.d.warga.forEach(function(w, idx) {
         if (w.pindah) return;
         var label = esc(w.nama);
-        if (label.indexOf('(') < 0 && w.blok && w.blok !== '-') {
-          label += ' (Blok ' + esc(w.blok) + ')';
-        }
+        if (label.indexOf('(') < 0 && w.blok && w.blok !== '-') label += ' (Blok ' + esc(w.blok) + ')';
         if (!q || label.toLowerCase().indexOf(q) >= 0 || String(w.blok).toLowerCase().indexOf(q) >= 0) {
           optPortal += '<option value="' + idx + '">' + label + '</option>';
           if (matchedIdx === -1) matchedIdx = idx;
@@ -1181,7 +1225,6 @@ nav.bar-nav button:active { transform: scale(.96); }
     }
   }
 
-  // Pengisian Dropdown Tahun pada Form Lapor Bayar
   function isiOpsiTahunLapor() {
     var selT = $('laporTahun');
     if (!selT) return;
@@ -1192,7 +1235,6 @@ nav.bar-nav button:active { transform: scale(.96); }
     selT.innerHTML = html;
   }
 
-  // Filter bulan yang belum lunas pada form Lapor Bayar Warga sesuai Tahun & Nama/Unit
   function updateOpsiBulanLapor() {
     var selW = $('laporNamaWarga');
     var selT = $('laporTahun');
@@ -1209,13 +1251,13 @@ nav.bar-nav button:active { transform: scale(.96); }
     var namaTarget = S.d.warga[idx].nama;
 
     if (tahunDipilih === S.tahun) {
-      prosesRenderBulanTunggakan(S.d.warga[idx]);
+      prosesRenderBulanTunggakan(S.d.warga[idx], tahunDipilih);
     } else {
       var cached = bacaLS(tahunDipilih);
       if (cached && cached.warga) {
         var wList = prosesWargaClean(cached.warga, tahunDipilih);
         var targetW = wList.find(function(x) { return x.nama === namaTarget; });
-        prosesRenderBulanTunggakan(targetW);
+        prosesRenderBulanTunggakan(targetW, tahunDipilih);
       } else {
         selB.innerHTML = '<option value="">Memeriksa data tahun ' + tahunDipilih + '…</option>';
         selB.disabled = true;
@@ -1225,7 +1267,7 @@ nav.bar-nav button:active { transform: scale(.96); }
             tulisLS(res, tahunDipilih);
             var wListBaru = prosesWargaClean(res.warga, tahunDipilih);
             var targetWBaru = wListBaru.find(function(x) { return x.nama === namaTarget; });
-            prosesRenderBulanTunggakan(targetWBaru);
+            prosesRenderBulanTunggakan(targetWBaru, tahunDipilih);
           } else {
             selB.innerHTML = '<option value="">Gagal memeriksa tahun ' + tahunDipilih + '</option>';
           }
@@ -1237,7 +1279,7 @@ nav.bar-nav button:active { transform: scale(.96); }
     }
   }
 
-  function prosesRenderBulanTunggakan(w) {
+  function prosesRenderBulanTunggakan(w, tahunDipilih) {
     var selB = $('laporBulan');
     if (!selB) return;
     if (!w) {
@@ -1247,22 +1289,25 @@ nav.bar-nav button:active { transform: scale(.96); }
 
     var html = '';
     var adaTunggakan = false;
+    var firstBln = 0;
     for (var m = 1; m <= 12; m++) {
       var s = st(w, m);
       if (s.lunas || s.belumMasuk) continue;
       adaTunggakan = true;
-      var labelTambahan = s.status && s.status !== 'Tidak ada data' && s.status !== 'Belum Lunas' ? ' (' + s.status + ')' : '';
-      html += '<option value="' + m + '">' + NAMA_BULAN[m] + labelTambahan + '</option>';
+      if (!firstBln) firstBln = m;
+      var tarifB = getTarifBulan(m, tahunDipilih);
+      html += '<option value="' + m + '">' + NAMA_BULAN[m] + ' (' + rp(tarifB) + ')' + '</option>';
     }
 
     if (!adaTunggakan) {
       selB.innerHTML = '<option value="">Semua bulan sudah lunas 🎉</option>';
+      $('laporNominal').value = '';
     } else {
       selB.innerHTML = html;
+      $('laporNominal').value = getTarifBulan(firstBln, tahunDipilih);
     }
   }
 
-  // Portal Mandiri Warga
   function tampilkanPortalRumah() {
     var sel = $('selPortalBlok');
     var box = $('portalWargaKonten');
@@ -1277,7 +1322,8 @@ nav.bar-nav button:active { transform: scale(.96); }
     for (var m = 1; m <= 12; m++) {
       var s = st(w, m);
       var c = s.belumMasuk ? 'f' : s.pending ? 's' : s.lunas ? 'l' : s.status === 'Sebagian' ? 's' : (s.kosong || (S.tahun === NOW.getFullYear() && m >= NOW.getMonth() + 1) || S.tahun > NOW.getFullYear()) ? 'f' : '';
-      dots += '<span class="' + c + '" title="' + esc(NAMA_BULAN[m] + ': ' + s.status) + '">' + (s.belumMasuk ? '&ndash;' : NB[m]) + '</span>';
+      var tarifM = getTarifBulan(m, S.tahun);
+      dots += '<span class="' + c + '" title="' + esc(NAMA_BULAN[m] + ': ' + s.status + ' (' + rp(tarifM) + ')') + '">' + (s.belumMasuk ? '&ndash;' : NB[m]) + '</span>';
     }
 
     box.innerHTML = 
@@ -1295,7 +1341,6 @@ nav.bar-nav button:active { transform: scale(.96); }
       '</div>';
   }
 
-  // Antrean Lapor Bayar Warga
   function renderAntreanLapor() {
     var box = $('v-antrean'); box.innerHTML = '<div class="note">Memuat antrean…</div>';
     run('getDaftarLaporanBayar', [S.pin], function(list) {
@@ -1306,9 +1351,7 @@ nav.bar-nav button:active { transform: scale(.96); }
       }
       box.innerHTML = pending.map(function(item) {
         var labelNama = esc(item.nama);
-        if (labelNama.indexOf('(') < 0 && item.blok && item.blok !== '-') {
-          labelNama += ' (Blok ' + esc(item.blok) + ')';
-        }
+        if (labelNama.indexOf('(') < 0 && item.blok && item.blok !== '-') labelNama += ' (Blok ' + esc(item.blok) + ')';
         return '<div class="item">' +
           '<div class="h"><div><b>' + labelNama + '</b><div class="note">Iuran ' + esc(item.namaBulan) + ' ' + item.tahun + ' · ' + esc(item.tanggal) + '</div></div><span class="pill warn">Menunggu</span></div>' +
           '<div>Nominal: <b>' + rp(item.nominal) + '</b></div>' +
@@ -1322,15 +1365,66 @@ nav.bar-nav button:active { transform: scale(.96); }
     }, function(err) { box.innerHTML = '<div class="err-text">' + esc(err.message) + '</div>'; });
   }
 
+  function bukaModalAturTarif() {
+    var th = $('tarifTahun'), bl = $('tarifBulan');
+    th.innerHTML = $('selTahun').innerHTML;
+    th.value = S.tahun;
+
+    var optB = '';
+    for (var m = 1; m <= 12; m++) optB += '<option value="' + m + '"' + (m === S.bulan ? ' selected' : '') + '>' + NAMA_BULAN[m] + '</option>';
+    bl.innerHTML = optB;
+
+    updateFormTarifAdmin();
+    renderDaftarTarifKhusus();
+    pesan('tarifErr', '');
+    bukaModal('m-tarif');
+  }
+
+  function updateFormTarifAdmin() {
+    var t = Number($('tarifTahun').value) || S.tahun;
+    var b = Number($('tarifBulan').value) || S.bulan;
+    var tarif = getTarifBulan(b, t);
+    $('tarifNominal').value = tarif;
+
+    var kunci = t + '-' + b;
+    var adaKhusus = S.d.tarifKhusus && S.d.tarifKhusus[kunci];
+    if (adaKhusus) {
+      $('tarifInfoKunci').innerHTML = 'Status: <b style="color:var(--warn)">Buka Kunci (Tarif Khusus ' + rp(tarif) + ')</b>';
+    } else {
+      $('tarifInfoKunci').innerHTML = 'Status: <b style="color:var(--ok)">Terkunci Standar (Rp 60.000)</b>';
+    }
+  }
+
+  function renderDaftarTarifKhusus() {
+    var box = $('v-daftarTarif');
+    if (!box) return;
+    var khusus = S.d.tarifKhusus || {};
+    var keys = Object.keys(khusus).filter(function(k) { return Number(khusus[k]) > 0 && Number(khusus[k]) !== 60000; });
+    if (!keys.length) {
+      box.innerHTML = '<div class="empty" style="padding:10px 0;font-size:12px">Semua bulan terkunci standar di Rp 60.000.</div>';
+      return;
+    }
+    box.innerHTML = keys.map(function(k) {
+      var parts = k.split('-');
+      var th = parts[0], bl = Number(parts[1]);
+      return '<div class="item" style="padding:8px 10px;display:flex;justify-content:space-between;align-items:center">' +
+        '<div><b>' + NAMA_BULAN[bl] + ' ' + th + '</b><span class="note" style="display:block">' + rp(khusus[k]) + '</span></div>' +
+        '<button type="button" class="chip" data-act="resetTarifKunci" data-k="' + k + '" style="font-size:11px">Kunci Normal</button>' +
+      '</div>';
+    }).join('');
+  }
+
   function renderVerif() {
     var w = S.verif; if (!w) return;
     var s = st(w, S.bulanVerif), opsi = '';
     for (var m = 1; m <= 12; m++) { 
       var x = st(w, m); 
-      opsi += '<option value="' + m + '"' + (m === S.bulanVerif ? ' selected' : '') + '>' + NAMA_BULAN[m] + ' ' + S.tahun + ' - ' + esc(x.status) + '</option>'; 
+      var tarifB = getTarifBulan(m, S.tahun);
+      opsi += '<option value="' + m + '"' + (m === S.bulanVerif ? ' selected' : '') + '>' + NAMA_BULAN[m] + ' ' + S.tahun + ' - ' + esc(x.status) + ' (' + rp(tarifB) + ')' + '</option>'; 
     }
     var bisa = !w.pindah && !s.lunas && !s.kosong && !s.belumMasuk && !S.menyimpan;
-    var nominal = S.d.biayaIuran - (s.nominal || 0);
+    var tarifTepat = getTarifBulan(S.bulanVerif, S.tahun);
+    var nominal = tarifTepat - (s.nominal || 0);
     var info = w.pindah ? 'Warga ini sudah pindah.' : s.belumAktif ? 'Iuran Casavera baru aktif Maret 2024.' : s.belumMasuk ? 'Bulan ini warga belum masuk/tinggal di Casavera.' : s.lunas ? 'Bulan ini sudah lunas.' : s.kosong ? 'Belum ada kolomnya di sheet rekap.' : 'Akan dicatat pemasukan ' + rp(nominal) + ' di sheet Transaksi.';
     $('verifBody').innerHTML = '<h3>Verifikasi iuran</h3><div><b>' + esc(w.nama) + '</b><div class="note">Blok ' + esc(w.blok) + ' · ' + esc(w.statusHunian) + '</div></div>' +
       '<label>Bulan iuran<select class="input" id="selBulanVerif">' + opsi + '</select></label><div class="' + (bisa ? 'note' : 'err-text') + '">' + info + '</div><div class="err-text" id="vErr" hidden></div>' +
@@ -1351,7 +1445,13 @@ nav.bar-nav button:active { transform: scale(.96); }
   function act(a, el) {
     if (a === 'muat') muat(true);
     else if (a === 'toggleSaldo') { S.sembunyi = !S.sembunyi; renderHero(); }
-    else if (a === 'dana') bukaModal('m-dana');
+    else if (a === 'dana') {
+      var tarifBulan = getTarifBulan(S.bulan, S.tahun);
+      if ($('labelNominalDana')) {
+        $('labelNominalDana').innerHTML = rp(tarifBulan) + ' <span style="font-size:13px;font-weight:600">/ ' + NAMA_BULAN[S.bulan] + ' ' + S.tahun + '</span>';
+      }
+      bukaModal('m-dana');
+    }
     else if (a === 'bukaPortalWarga') {
       if ($('selPortalTahun')) $('selPortalTahun').value = S.tahun;
       if ($('cariPortalWarga')) $('cariPortalWarga').value = '';
@@ -1365,8 +1465,42 @@ nav.bar-nav button:active { transform: scale(.96); }
       isiOpsiTahunLapor();
       updateOpsiBulanLapor();
     }
+    else if (a === 'bukaAturTarif') {
+      bukaModalAturTarif();
+    }
+    else if (a === 'resetTarifBulan') {
+      var th = Number($('tarifTahun').value) || S.tahun;
+      var bl = Number($('tarifBulan').value) || S.bulan;
+      $('btnResetTarif').disabled = true;
+      run('simpanSetelanTarif', [{ tahun: th, bulan: bl, reset: true }, S.pin], function(res) {
+        $('btnResetTarif').disabled = false;
+        toast('Tarif ' + NAMA_BULAN[bl] + ' ' + th + ' dikunci kembali ke Rp 60.000');
+        if (res && res.tarifKhusus) S.d.tarifKhusus = res.tarifKhusus;
+        updateFormTarifAdmin();
+        renderDaftarTarifKhusus();
+        muat(true);
+      }, function(err) {
+        $('btnResetTarif').disabled = false;
+        pesan('tarifErr', err.message);
+      });
+    }
+    else if (a === 'resetTarifKunci') {
+      var k = el.getAttribute('data-k');
+      var pts = k.split('-');
+      run('simpanSetelanTarif', [{ tahun: Number(pts[0]), bulan: Number(pts[1]), reset: true }, S.pin], function(res) {
+        toast('Tarif ' + NAMA_BULAN[Number(pts[1])] + ' ' + pts[0] + ' dikunci kembali ke Rp 60.000');
+        if (res && res.tarifKhusus) S.d.tarifKhusus = res.tarifKhusus;
+        updateFormTarifAdmin();
+        renderDaftarTarifKhusus();
+        muat(true);
+      }, function(err) { toast(err.message); });
+    }
     else if (a === 'bayarRumahIni') {
       tutupModal();
+      var tarifBulan = getTarifBulan(S.bulan, S.tahun);
+      if ($('labelNominalDana')) {
+        $('labelNominalDana').innerHTML = rp(tarifBulan) + ' <span style="font-size:13px;font-weight:600">/ ' + NAMA_BULAN[S.bulan] + ' ' + S.tahun + '</span>';
+      }
       bukaModal('m-dana');
     }
     else if (a === 'laporRumahIni') {
@@ -1441,6 +1575,31 @@ nav.bar-nav button:active { transform: scale(.96); }
       function (err) { S.menyimpan = false; tutupModal(); toast((err && err.message) || 'Gagal mengarsipkan.'); });
   }
 
+  // Form Pengaturan Tarif Iuran
+  $('f-tarif').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var th = Number($('tarifTahun').value) || S.tahun;
+    var bl = Number($('tarifBulan').value) || S.bulan;
+    var nom = Number($('tarifNominal').value);
+    if (!nom || nom <= 0) { pesan('tarifErr', 'Nominal harus lebih dari 0'); return; }
+
+    $('btnSimpanTarif').disabled = true; pesan('tarifErr', '');
+    run('simpanSetelanTarif', [{ tahun: th, bulan: bl, nominal: nom }, S.pin], function(res) {
+      $('btnSimpanTarif').disabled = false;
+      toast('Tarif ' + NAMA_BULAN[bl] + ' ' + th + ' berhasil dibuka menjadi ' + rp(nom));
+      if (res && res.tarifKhusus) S.d.tarifKhusus = res.tarifKhusus;
+      updateFormTarifAdmin();
+      renderDaftarTarifKhusus();
+      muat(true);
+    }, function(err) {
+      $('btnSimpanTarif').disabled = false;
+      pesan('tarifErr', err.message);
+    });
+  });
+
+  $('tarifTahun').addEventListener('change', updateFormTarifAdmin);
+  $('tarifBulan').addEventListener('change', updateFormTarifAdmin);
+
   // ---------- TAGIHAN WHATSAPP ----------
   var JEDA_TAGIH = 20, cdTimer = null;
   function mulaiCooldown() {
@@ -1492,7 +1651,7 @@ nav.bar-nav button:active { transform: scale(.96); }
       h.setUint16(10, 0, true); h.setUint16(12, 0x21, true); h.setUint32(14, crc, true); h.setUint32(18, sz, true); h.setUint32(22, sz, true); h.setUint16(26, n.length, true); h.setUint16(28, 0, true);
       parts.push(new Uint8Array(h.buffer), n, f.data);
       var c = new DataView(new ArrayBuffer(46));
-      c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true);
+      c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 0x0800, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true);
       c.setUint16(12, 0, true); c.setUint16(14, 0x21, true); c.setUint32(16, crc, true); c.setUint32(20, sz, true); c.setUint32(24, sz, true); c.setUint16(28, n.length, true);
       c.setUint32(42, off, true);
       central.push(new Uint8Array(c.buffer), n);
@@ -1642,6 +1801,11 @@ nav.bar-nav button:active { transform: scale(.96); }
     $('selPortalBlok').addEventListener('change', tampilkanPortalRumah);
     $('laporNamaWarga').addEventListener('change', updateOpsiBulanLapor);
     $('laporTahun').addEventListener('change', updateOpsiBulanLapor);
+    $('laporBulan').addEventListener('change', function() {
+      var bln = Number(this.value);
+      var thn = Number($('laporTahun').value) || S.tahun;
+      if (bln >= 1 && bln <= 12) $('laporNominal').value = getTarifBulan(bln, thn);
+    });
 
     // Form Lapor Bayar Warga
     $('f-lapor').addEventListener('submit', function(e) {
