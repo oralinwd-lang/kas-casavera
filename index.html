@@ -980,7 +980,7 @@ nav.bar-nav button:active { transform: scale(.96); }
       '<div class="big"' + (S.sembunyi ? '' : ' data-key="saldo" data-count="' + d.saldoUtama + '"') + '>' + (S.sembunyi ? 'Rp ••••••' : rp(d.saldoUtama)) + '</div>' + tHtml +
       '<div class="row"><div class="mini"><span>Masuk ' + S.tahun + '</span><b data-key="masuk" data-count="' + d.uangMasuk + '">' + rp(d.uangMasuk) + '</b></div><div class="mini"><span>Keluar ' + S.tahun + '</span><b data-key="keluar" data-count="' + d.uangKeluar + '">' + rp(d.uangKeluar) + '</b></div></div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
-        '<button class="btn light" data-act="dana">Bayar via DANA</button>' +
+        '<button class="btn light" data-act="dana">BAYAR</button>' +
         '<button class="btn security" data-act="security">🛡️ Pos Security</button>' +
       '</div>' +
       '<div style="font-size:11px;opacity:.8">' + (d.audit ? 'Dibaca dari Google Sheet ' + esc(d.audit.waktuBaca) : '') + '</div>';
